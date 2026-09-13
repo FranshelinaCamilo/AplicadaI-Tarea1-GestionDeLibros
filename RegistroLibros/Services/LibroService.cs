@@ -12,23 +12,67 @@ namespace RegistroLibros.Services
         {
             await using var contexto = await contextFactory.CreateDbContextAsync();
             return await contexto.Libros
-                .Include(a => a.Autor)
                 .FirstOrDefaultAsync(l => l.LibroId == LibroId);
         }
 
-        public Task<bool> Eliminar(int id)
+        public async Task<bool> Eliminar(int LibroId)
         {
-            throw new NotImplementedException();
+            await using var contexto = await contextFactory.CreateDbContextAsync();
+            return await contexto.Libros
+                .Where(l => l.LibroId == LibroId)
+                .ExecuteDeleteAsync() > 0;
         }
 
-        public Task<List<Libro>> GetList(Expression<Func<Libro, bool>> criterio)
+        public async Task<List<Libro>> GetList(Expression<Func<Libro, bool>> criterio)
         {
-            throw new NotImplementedException();
+            await using var contexto = await contextFactory.CreateDbContextAsync();
+            return await contexto.Libros
+                .Where(criterio)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
-        public Task<bool> Guardar(Libro entidad)
+        public async Task<bool> Guardar(Libro libro)
         {
-            throw new NotImplementedException();
+            if (!await Existe(libro.LibroId))
+            {
+                if(await ExisteTitulo(libro.Titulo))
+                    return false;
+
+                return await Insertar(libro);
+            }
+            else
+            {
+                return await Modificar(libro);
+            }
+        }
+
+        private async Task<bool> Existe(int LibroId)
+        {
+            await using var contexto = await contextFactory.CreateDbContextAsync();
+            return await contexto.Libros
+                .AnyAsync(l => l.LibroId == LibroId);
+        }
+
+        private async Task<bool> ExisteTitulo(string titulo)
+        {
+            await using var contexto = await contextFactory.CreateDbContextAsync();
+            return await contexto.Libros
+                .AnyAsync(t => t.Titulo == titulo);
+        }
+
+        private async Task<bool> Insertar(Libro libro)
+        {
+            await using var contexto = await contextFactory.CreateDbContextAsync();
+            contexto.Libros.Add(libro);
+            return await contexto.SaveChangesAsync() > 0; 
+        }
+
+        private async Task<bool> Modificar (Libro libro)
+        {
+            await using var contexto = await contextFactory.CreateDbContextAsync();
+            contexto.Update(libro);
+            return await contexto.SaveChangesAsync() > 0;
         }
     }
 }
