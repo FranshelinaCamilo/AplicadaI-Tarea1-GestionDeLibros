@@ -14,6 +14,7 @@ builder.Services.AddDbContextFactory<Contexto>(o => o.UseSqlite(ConStr));
 
 builder.Services.AddScoped<LibroService>();
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

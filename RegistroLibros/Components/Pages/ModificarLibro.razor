@@ -1,4 +1,4 @@
-﻿@page "/modificarLibro"
+﻿@page "/modificarLibro/{LibroId:int}"
 @using RegistroLibros.Models
 @using RegistroLibros.Services
 @inject LibroService libroService
@@ -32,33 +32,45 @@
 
 
     <div class ="d-flex justify-content-center gap-4">
-        <a href="/IndexLibro" class="btn btn-primary mt-5">Volver</a>
-        <button class="btn btn-primary mt-5" @onclick="Guardar">Guardar</button>
+        <a href="/IndexLibro" class="btn btn-secondary bi bi-arrow-left mt-5">Volver</a>
+        <button class="btn btn-primary mt-5 bi bi-save" @onclick="Guardar"> Modificar</button>
+        <button class="btn btn-danger mt-5 bi bi-trash" @onclick="Eliminar"> Eliminar</button>
     </div>
 
 </div>
 
 
 @code {
-    
+
+    [Parameter]
+
+    public int LibroId { get; set; }
+
+    private Libro libro = new Libro();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var libroEncontrado = await libroService.Buscar(LibroId);
+
+        if (libroEncontrado != null)
+        {
+            libro = libroEncontrado;
+        }
+    }
 
     private async Task Guardar()
     {
         bool resultado = await libroService.Guardar(libro);
+
+        if (resultado)
+        {
+            libro = new Libro();
+        }
     }
 
-    if(resultado)
+    private async Task Eliminar()
     {
-     private Libro libro = new Libro();   
+        bool resultado = await libroService.Eliminar(libro.LibroId);
     }
-    else
-    {
-        
-    }
-
 }
-<h3>ModificarLibro</h3>
 
-@code {
-
-}

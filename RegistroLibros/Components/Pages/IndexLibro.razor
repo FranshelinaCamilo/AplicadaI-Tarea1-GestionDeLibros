@@ -20,15 +20,23 @@
             <label>Busqueda</label>
         </div>
 
-        <div>
-            <select class="mt-2">
-                <option selected disabled >Selecciona una opcion</option>
-                <option>LibroId</option>
-                <option>Titulo</option>
-                <option>Autor</option>
-                <option>Año Publicacion</option>
-            </select>
-            <input type="text" placeholder="Buscar" style="margin-left: 60px" />
+        <div class="row align-items-center">
+            <div class="col-3">
+                <select class="form-select" @bind="filtroPor">
+                    <option value="" disabled>Selecciona una opcion</option>
+                    <option value="LibroId">LibroId</option>
+                    <option value="Titulo">Titulo</option>
+                    <option value="Autor">Autor</option>
+                    <option value="AnioPublicacion">Año Publicacion</option>
+                </select>
+            </div>
+
+            <div class="col-4">
+                <div class="input-group">
+                    <input class="form-control" @bind="filtro" placeholder="Buscar" />
+                    <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+                </div>
+            </div>
         </div>
 
         <table class="table bordered" style="margin-top: 20px;">
@@ -50,12 +58,11 @@
                         <td>@libro.Autor</td>
                         <td>@libro.AnioPublicacion</td>
                         <td>
-                            <button class="btn btn-primary">Editar</button>
-                            <button class="btn btn-danger">Eliminar</button>
+                            <a href="@($"/modificarLibro/{libro.LibroId}")" class="btn btn-primary bi bi-pencil-square" ></a>
+                            <button class="btn btn-danger bi bi-trash" @onclick="() => Eliminar(libro)"></button>
                         </td>
                     </tr>
                 }
-
             </tbody>
         </table>
     </div>
@@ -65,8 +72,56 @@
 @code {
     private List<Libro> libros = new();
 
+    private string filtro { get; set; } = string.Empty;
+    private string filtroPor { get; set; } = string.Empty;
+
     protected override async Task OnInitializedAsync()
     {
-         libros = await libroService.GetList(l => true);
+        libros = await libroService.GetList(l => true);
     }
+
+    private async Task Eliminar(Libro libro)
+    {
+        bool resultado = await libroService.Eliminar(libro.LibroId);
+
+        if (resultado)
+        {
+            libros = await libroService.GetList(l => true);
+        }
+    }
+
+    private async Task Buscar()
+    {
+        if(filtro == "")
+        {
+            libros = await libroService.GetList(l => true);
+        }
+        else if (filtro.Trim() != "" && filtroPor == "Autor")
+        {
+            libros = await libroService.GetList(l =>
+                l.Autor.ToLower().Contains(filtro.ToLower()));
+        }
+        else if (filtro.Trim() != "" && filtroPor == "Titulo")
+        {
+            libros = await libroService.GetList(l =>
+                l.Titulo.ToLower().Contains(filtro.ToLower()));
+        }
+        else if (filtroPor == "LibroId")
+        {
+            if (int.TryParse(filtro, out int id))
+            {
+                libros = await libroService.GetList(l => l.LibroId == id);
+            }
+        }
+        else if (filtroPor == "AnioPublicacion")
+        {
+            if (int.TryParse(filtro, out int anio))
+            {
+                libros = await libroService.GetList(l => l.AnioPublicacion == anio);
+            }
+        }
+        
+    }
+
+
 }
