@@ -14,6 +14,7 @@ builder.Services.AddDbContextFactory<Contexto>(o => o.UseSqlite(ConStr));
 
 builder.Services.AddScoped<LibroService>();
 
+builder.Services.AddBlazorBootstrap();
 
 var app = builder.Build();
 

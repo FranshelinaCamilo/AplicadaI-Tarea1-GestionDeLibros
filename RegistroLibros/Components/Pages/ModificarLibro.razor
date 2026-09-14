@@ -1,44 +1,56 @@
 ﻿@page "/modificarLibro/{LibroId:int}"
 @using RegistroLibros.Models
 @using RegistroLibros.Services
+@using RegistroLibros.Extentors
+@inject ToastService toastService
 @inject LibroService libroService
 @rendermode InteractiveServer
 
 <PageTitle>Modificar Libro</PageTitle>
 
-<div class="p-4 border rounded ">
 
-    <h3>Modificar Libro</h3> 
+<ConfirmDialog @ref="dialog" />
+
+<EditForm Model="libro" OnValidSubmit="Modificar">
+    <DataAnnotationsValidator />
+
+    <div class="p-4 border rounded ">
+
+        <h3>Modificar Libro</h3> 
     
-    <div class="mb-3 mt-3">
-        <label>LibroId</label>
-        <input type="number" class="form-control" @bind="libro.LibroId" />
-    </div>
+        <div class="mb-3 mt-3">
+            <label>LibroId</label>
+            <InputNumber type="number" class="form-control" @bind-Value="libro.LibroId" readonly />
+        </div>
     
-    <div class="mb-3">
-        <label>Titulo</label>
-        <input type="text" class="form-control" @bind="libro.Titulo" />
-    </div>
+        <div class="mb-3">
+            <label>Titulo</label>
+            <InputText type="text" class="form-control" @bind-Value="libro.Titulo" />
+            <ValidationMessage For="() => libro.Titulo" />
+        </div>
         
-    <div class="mb-3">
-        <label>Autor</label>
-        <input type="text" class="form-control" @bind="libro.Autor" />
-    </div>
+        <div class="mb-3">
+            <label>Autor</label>
+            <InputText type="text" class="form-control" @bind-Value="libro.Autor" />
+            <ValidationMessage For="() => libro.Autor" />
+        </div>
     
-    <div class="mb-3">
-        <label>Año de Publicación</label>
-        <input type="number" class="form-control" @bind="libro.AnioPublicacion" />
+        <div class="mb-3">
+            <label>Año de Publicación</label>
+            <InputNumber type="number" class="form-control" @bind-Value="libro.AnioPublicacion" />
+            <ValidationMessage For="() => libro.AnioPublicacion" />
+        </div>
+
+
+        <div class ="d-flex justify-content-center gap-4">
+            <a href="/IndexLibro" class="btn btn-secondary bi bi-arrow-left mt-5"> Volver</a>
+            <button type="submit" class="btn btn-primary mt-5 bi bi-save"> Modificar</button>
+            <button type="button" class="btn btn-danger mt-5 bi bi-trash" @onclick="Eliminar"> Eliminar</button>
+        </div>
+
     </div>
 
-
-    <div class ="d-flex justify-content-center gap-4">
-        <a href="/IndexLibro" class="btn btn-secondary bi bi-arrow-left mt-5">Volver</a>
-        <button class="btn btn-primary mt-5 bi bi-save" @onclick="Guardar"> Modificar</button>
-        <button class="btn btn-danger mt-5 bi bi-trash" @onclick="Eliminar"> Eliminar</button>
-    </div>
-
-</div>
-
+</EditForm>
 
 @code {
 
@@ -47,6 +59,8 @@
     public int LibroId { get; set; }
 
     private Libro libro = new Libro();
+
+    private ConfirmDialog dialog = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -58,19 +72,52 @@
         }
     }
 
-    private async Task Guardar()
+    private async Task Modificar()
     {
         bool resultado = await libroService.Guardar(libro);
 
         if (resultado)
         {
-            libro = new Libro();
+            toastService.ShowSuccess("Libro modificado correctamente.");    
+        }
+        else
+        {
+            toastService.ShowError("Error al modificar el libro.");
+        
         }
     }
 
-    private async Task Eliminar()
+   private async Task Eliminar()
     {
+
+        var opciones = new ConfirmDialogOptions
+        {
+            YesButtonText = "Eliminar",
+            YesButtonColor = ButtonColor.Danger,
+            NoButtonText = "Cancelar",
+            NoButtonColor = ButtonColor.Secondary,
+            IsVerticallyCentered = true
+        };
+
+        bool confirmar = await dialog.ShowAsync(
+            title: "Eliminar libro",
+            message1: $"¿Está seguro de que desea eliminar \"{libro.Titulo}\"?",
+            confirmDialogOptions: opciones);
+
+        if (!confirmar)
+            return;
+
+
         bool resultado = await libroService.Eliminar(libro.LibroId);
+
+        if (resultado)
+        {
+            toastService.ShowSuccess("Libro eliminado correctamente.");
+        }
+        else
+        {
+            toastService.ShowError("Error al eliminar el libro.");
+        }
     }
 }
 

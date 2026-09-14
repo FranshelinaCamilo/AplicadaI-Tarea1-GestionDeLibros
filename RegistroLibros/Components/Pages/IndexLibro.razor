@@ -1,10 +1,14 @@
 ﻿@page "/IndexLibro"
 @using RegistroLibros.Models
 @using RegistroLibros.Services
+@using RegistroLibros.Extentors
+@inject ToastService toastService
 @inject LibroService libroService
 @rendermode InteractiveServer
 
 <PageTitle>Libros Registrados</PageTitle>
+
+<ConfirmDialog @ref="dialog" />
 
 <div class="p-3 border rounded">
 
@@ -70,6 +74,8 @@
 </div>
 
 @code {
+
+    private ConfirmDialog dialog = default!;
     private List<Libro> libros = new();
 
     private string filtro { get; set; } = string.Empty;
@@ -82,11 +88,35 @@
 
     private async Task Eliminar(Libro libro)
     {
+
+        var opciones = new ConfirmDialogOptions
+        {
+            YesButtonText = "Eliminar",
+            YesButtonColor = ButtonColor.Danger,
+            NoButtonText = "Cancelar",
+            NoButtonColor = ButtonColor.Secondary,
+            IsVerticallyCentered = true
+        };
+
+        bool confirmar = await dialog.ShowAsync(
+            title: "Eliminar libro",
+            message1: $"¿Está seguro de que desea eliminar \"{libro.Titulo}\"?",
+            confirmDialogOptions: opciones);
+
+        if (!confirmar)
+            return;
+
+
         bool resultado = await libroService.Eliminar(libro.LibroId);
 
         if (resultado)
         {
             libros = await libroService.GetList(l => true);
+            toastService.ShowSuccess("Libro eliminado correctamente.");
+        }
+        else
+        {
+            toastService.ShowError("Error al eliminar el libro.");
         }
     }
 
