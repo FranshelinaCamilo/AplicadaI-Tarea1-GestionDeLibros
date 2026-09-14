@@ -47,7 +47,7 @@ namespace RegistroLibros.Services
             }
         }
 
-        private async Task<bool> Existe(int LibroId)
+        private async Task<bool> Existe(int? LibroId)
         {
             await using var contexto = await contextFactory.CreateDbContextAsync();
             return await contexto.Libros

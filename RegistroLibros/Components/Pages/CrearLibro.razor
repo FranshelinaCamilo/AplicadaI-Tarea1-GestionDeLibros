@@ -1,0 +1,50 @@
+﻿@page "/crearLibro"
+@using RegistroLibros.Models
+@using RegistroLibros.Services
+@inject LibroService libroService
+@rendermode InteractiveServer
+
+<PageTitle>Crear Libro</PageTitle>
+
+<div class="p-4 border rounded ">
+
+    <h3>Crear Libro</h3> 
+    
+    <div class="mb-3 mt-3">
+        <label>LibroId</label>
+        <input type="number" class="form-control" @bind="libro.LibroId" />
+    </div>
+    
+    <div class="mb-3">
+        <label>Titulo</label>
+        <input type="text" class="form-control" @bind="libro.Titulo" />
+    </div>
+        
+    <div class="mb-3">
+        <label>Autor</label>
+        <input type="text" class="form-control" @bind="libro.Autor" />
+    </div>
+    
+    <div class="mb-3">
+        <label>Año de Publicación</label>
+        <input type="number" class="form-control" @bind="libro.AnioPublicacion" />
+    </div>
+
+
+    <div class ="d-flex justify-content-center gap-4">
+        <a href="/IndexLibro" class="btn btn-primary mt-5">Volver</a>
+        <button class="btn btn-primary mt-5" @onclick="Guardar">Guardar</button>
+    </div>
+
+</div>
+
+
+@code {
+    private Libro libro = new Libro();
+
+    private async Task Guardar()
+    {
+        await libroService.Guardar(libro);
+    }
+
+}
