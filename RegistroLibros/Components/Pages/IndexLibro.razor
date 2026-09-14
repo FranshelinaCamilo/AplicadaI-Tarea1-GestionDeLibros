@@ -1,28 +1,72 @@
 ﻿@page "/IndexLibro"
+@using RegistroLibros.Models
+@using RegistroLibros.Services
+@inject LibroService libroService
+@rendermode InteractiveServer
 
 <PageTitle>Libros Registrados</PageTitle>
 
-<div class="p-3 border rounded align-items-center">
+<div class="p-3 border rounded">
+
     <div class=" justify-content-between align-items-lg-center d-flex">
         <h4>Consulta de Libros</h4>
         <button class="btn btn-primary">Crear +</button>
     </div>
-    <div class="p-3 border mt-3 mr-0 ml-0">
-        <label style="margin-right: 180px;">Filtra por</label>
-        <label>Busqueda</label>
+
+    <div class="p-3 border mt-3">
+
+        <div class="d-flex" style="gap: 185px">
+            <label>Filtra por</label>
+            <label>Busqueda</label>
+        </div>
+
         <div>
-            <Select class="mt-2">
-                <option selected >Selecciona una opcion</option>
+            <select class="mt-2">
+                <option selected disabled >Selecciona una opcion</option>
                 <option>LibroId</option>
                 <option>Titulo</option>
                 <option>Autor</option>
                 <option>Año Publicacion</option>
             </select>
-            <input type="text" placeholder="Buscar..." style="margin-left: 60px">
+            <input type="text" placeholder="Buscar" style="margin-left: 60px" />
         </div>
+
+        <table class="table bordered" style="margin-top: 20px;">
+            <thead>
+                <tr>
+                    <th>LibroId</th>
+                    <th>Titulo</th>
+                    <th>Autor</th>
+                    <th>Año Publicacion</th>
+                    <th>Opciones</th>
+                </tr>          
+            </thead>
+            <tbody>
+
+                @foreach(var libro in libros){
+                    <tr>
+                        <td>@libro.LibroId</td>
+                        <td>@libro.Titulo</td>
+                        <td>@libro.Autor</td>
+                        <td>@libro.AnioPublicacion</td>
+                        <td>
+                            <button class="btn btn-primary">Editar</button>
+                            <button class="btn btn-danger">Eliminar</button>
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
     </div>
+    <p style="margin-top: 10px;">Cantidad: @libros.Count</p>
 </div>
 
 @code {
+    private List<Libro> libros = new();
 
+    protected override async Task OnInitializedAsync()
+    {
+         libros = await libroService.GetList(l => true);
+    }
 }

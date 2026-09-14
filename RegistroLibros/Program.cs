@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using RegistroLibros.Components;
 using RegistroLibros.Context;
+using RegistroLibros.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +10,9 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 var ConStr = builder.Configuration.GetConnectionString("ConStr");
-builder.Services.AddDbContext<Contexto>(o => o.UseSqlite(ConStr));
+builder.Services.AddDbContextFactory<Contexto>(o => o.UseSqlite(ConStr));
+
+builder.Services.AddScoped<LibroService>();
 
 var app = builder.Build();
 
