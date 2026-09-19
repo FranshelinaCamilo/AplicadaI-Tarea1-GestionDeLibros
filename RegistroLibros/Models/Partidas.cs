@@ -4,7 +4,6 @@ namespace RegistroLibros.Models
 {
     public class Partidas
     {
-        [Key]
         public int PartidaId { get; set; }
 
         [ForeignKey("Jugador")]
