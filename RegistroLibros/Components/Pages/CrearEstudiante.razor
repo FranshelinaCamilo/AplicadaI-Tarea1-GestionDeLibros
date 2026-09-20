@@ -1,0 +1,75 @@
+﻿
+@page "/CrearEstudiante"
+@rendermode InteractiveServer
+
+<PageTitle>Crear Estudiante</PageTitle>
+
+<EditForm Model="estudiante" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="p-4 border rounded ">
+
+        <h3>Crear Estudiante</h3> 
+    
+        <div class="mb-3 mt-3">
+            <label>EstudianteId</label>
+            <InputNumber type="number" class="form-control" @bind-Value="estudiante.EstudianteId" readonly />
+        </div>
+    
+        <div class="mb-3">
+            <label>Nombre</label>
+            <InputText type="text" class="form-control" @bind-Value="estudiante.Nombres" />
+            <ValidationMessage For="() => estudiante.Nombres" />
+        </div>
+        
+        <div class="mb-3">
+            <label>Dirección</label>
+            <InputText type="text" class="form-control" @bind-Value="estudiante.Direccion" />
+            <ValidationMessage For="() => estudiante.Direccion" />
+        </div>
+    
+        <div class="mb-3">
+            <label>Email</label>
+            <InputText type="email" class="form-control" @bind-Value="estudiante.Email" />
+            <ValidationMessage For="() => estudiante.Email" />
+        </div>
+
+        <div class="mb-3">
+            <label>Fecha de Nacimiento</label>
+            <InputDate TValue="DateOnly" class="form-control" @bind-Value="estudiante.FechaNacimiento" />
+            <ValidationMessage For="() => estudiante.FechaNacimiento" />
+        </div>
+
+
+        <div class ="d-flex justify-content-center gap-4">
+            <a href="/IndexEstudiantes" class="btn btn-secondary bi bi-arrow-left mt-5"> Volver</a>
+            <button type="submit" class="btn btn-primary mt-5 bi bi-save"> Guardar</button>
+        </div>
+
+    </div>
+</EditForm>
+
+
+@code {
+
+    private Estudiantes estudiante = new Estudiantes();
+
+    private async Task Guardar()
+    {
+        bool resultado = await estudianteService.Guardar(estudiante);
+
+        if (resultado)
+        {
+            toastService.ShowSuccess("Estudiante guardado correctamente.");
+            estudiante = new Estudiantes();
+        }
+        else if(estudianteService.Buscar(estudiante.EstudianteId) != null)
+        {
+            toastService.ShowError("El estudiante ya existe.");
+        }
+        else
+        {
+            toastService.ShowError("Error al guardar el estudiante.");
+        }
+    }
+}

@@ -13,6 +13,6 @@ namespace RegistroLibros.Models
         [Required(ErrorMessage = "Este campo es obligatorio")]
         public string Email { get; set; } = null!;
         [Required(ErrorMessage = "Este campo es obligatorio")]
-        public DateTime FechaNacimiento { get; set; }
+        public DateOnly FechaNacimiento { get; set; }
     }
 }

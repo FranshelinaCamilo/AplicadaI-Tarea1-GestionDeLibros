@@ -96,7 +96,7 @@
 
         bool confirmar = await dialog.ShowAsync(
             title: "Eliminar estudiante",
-            message1: $"¿Está seguro de que desea eliminar \"{estudiante.Nombres}\"?",
+            message1: $"¿Está seguro de que desea eliminar al estudiante \"{estudiante.Nombres}\"?",
             confirmDialogOptions: opciones);
 
         if (!confirmar)

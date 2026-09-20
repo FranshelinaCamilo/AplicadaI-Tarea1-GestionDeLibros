@@ -1,0 +1,124 @@
+﻿@page "/modificarEstudiante/{EstudianteId:int}"
+@rendermode InteractiveServer
+
+<PageTitle>Modificar Estudiante</PageTitle>
+
+
+<ConfirmDialog @ref="dialog" />
+
+<EditForm Model="estudiante" OnValidSubmit="Modificar">
+    <DataAnnotationsValidator />
+
+    <div class="p-4 border rounded ">
+
+        <h3>Modificar Estudiante</h3> 
+    
+        <div class="mb-3 mt-3">
+            <label>EstudianteId</label>
+            <InputNumber type="number" class="form-control" @bind-Value="estudiante.EstudianteId" readonly />
+        </div>
+    
+        <div class="mb-3">
+            <label>Nombre</label>
+            <InputText type="text" class="form-control" @bind-Value="estudiante.Nombres" />
+            <ValidationMessage For="() => estudiante.Nombres" />
+        </div>
+        
+        <div class="mb-3">
+            <label>Dirección</label>
+            <InputText type="text" class="form-control" @bind-Value="estudiante.Direccion" />
+            <ValidationMessage For="() => estudiante.Direccion" />
+        </div>
+    
+        <div class="mb-3">
+            <label>Email</label>
+            <InputText type="email" class="form-control" @bind-Value="estudiante.Email" />
+            <ValidationMessage For="() => estudiante.Email" />
+        </div>
+
+        <div class="mb-3">
+            <label>Fecha de Nacimiento</label>
+            <InputDate TValue="DateOnly" class="form-control" @bind-Value="estudiante.FechaNacimiento" />
+            <ValidationMessage For="() => estudiante.FechaNacimiento" />
+        </div>
+
+
+        <div class ="d-flex justify-content-center gap-4">
+            <a href="/IndexEstudiantes" class="btn btn-secondary bi bi-arrow-left mt-5"> Volver</a>
+            <button type="submit" class="btn btn-primary mt-5 bi bi-save"> Modificar</button>
+            <button type="button" class="btn btn-danger mt-5 bi bi-trash" @onclick="Eliminar"> Eliminar</button>
+        </div>
+
+    </div>
+
+</EditForm>
+
+@code {
+
+    [Parameter]
+
+    public int EstudianteId { get; set; }
+
+    private Estudiantes estudiante = new Estudiantes();
+
+    private ConfirmDialog dialog = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var estudianteEncontrado = await estudianteService.Buscar(EstudianteId);
+
+        if (estudianteEncontrado != null)
+        {
+            estudiante = estudianteEncontrado;
+        }
+    }
+
+    private async Task Modificar()
+    {
+        bool resultado = await estudianteService.Guardar(estudiante);
+
+        if (resultado)
+        {
+            toastService.ShowSuccess("Estudiante modificado correctamente.");    
+        }
+        else
+        {
+            toastService.ShowError("Error al modificar el estudiante.");
+        
+        }
+    }
+
+   private async Task Eliminar()
+    {
+
+        var opciones = new ConfirmDialogOptions
+        {
+            YesButtonText = "Eliminar",
+            YesButtonColor = ButtonColor.Danger,
+            NoButtonText = "Cancelar",
+            NoButtonColor = ButtonColor.Secondary,
+            IsVerticallyCentered = true
+        };
+
+        bool confirmar = await dialog.ShowAsync(
+            title: "Eliminar estudiante",
+            message1: $"¿Está seguro de que desea eliminar al estudiante \"{estudiante.Nombres}\"?",
+            confirmDialogOptions: opciones);
+
+        if (!confirmar)
+            return;
+
+
+        bool resultado = await estudianteService.Eliminar(estudiante.EstudianteId);
+
+        if (resultado)
+        {
+            toastService.ShowSuccess("Estudiante eliminado correctamente.");
+        }
+        else
+        {
+            toastService.ShowError("Error al eliminar el estudiante.");
+        }
+    }
+}
+
