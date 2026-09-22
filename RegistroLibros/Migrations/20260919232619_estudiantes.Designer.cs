@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RegistroLibros.Context;
 
@@ -11,9 +12,11 @@ using RegistroLibros.Context;
 namespace RegistroLibros.Migrations
 {
     [DbContext(typeof(Contexto))]
-    partial class ContextoModelSnapshot : ModelSnapshot
+    [Migration("20260919232619_estudiantes")]
+    partial class estudiantes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,8 +41,8 @@ namespace RegistroLibros.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateOnly>("FechaNacimiento")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("FechaNacimiento")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Nombres")
                         .IsRequired()

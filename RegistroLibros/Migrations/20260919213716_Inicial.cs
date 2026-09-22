@@ -14,11 +14,11 @@ namespace RegistroLibros.Migrations
                 name: "Libros",
                 columns: table => new
                 {
-                    LibroId = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Titulo = table.Column<string>(type: "TEXT", nullable: false),
-                    Autor = table.Column<string>(type: "TEXT", nullable: false),
-                    AnioPublicacion = table.Column<int>(type: "INTEGER", nullable: false)
+                    LibroId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Titulo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Autor = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AnioPublicacion = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

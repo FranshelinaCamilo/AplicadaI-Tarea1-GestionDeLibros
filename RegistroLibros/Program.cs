@@ -10,9 +10,10 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 var ConStr = builder.Configuration.GetConnectionString("ConStr");
-builder.Services.AddDbContextFactory<Contexto>(o => o.UseSqlite(ConStr));
+builder.Services.AddDbContextFactory<Contexto>(o => o.UseSqlServer(ConStr));
 
 builder.Services.AddScoped<LibroService>();
+builder.Services.AddScoped<EstudianteService>();
 
 builder.Services.AddBlazorBootstrap();
 

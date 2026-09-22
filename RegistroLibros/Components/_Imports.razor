@@ -9,6 +9,16 @@
 @using RegistroLibros
 @using RegistroLibros.Components
 @using RegistroLibros.Components.Layout
+@using RegistroLibros.Models
+@using RegistroLibros.Services
+@inject LibroService libroService
+@inject EstudianteService estudianteService
+@inject ToastService toastService
+@using RegistroLibros.Extentors
+@using Aplicada1.Core;
+@using Microsoft.EntityFrameworkCore;
+@using RegistroLibros.Context;
+@using System.Linq.Expressions;
 
 
 @using BlazorBootstrap
