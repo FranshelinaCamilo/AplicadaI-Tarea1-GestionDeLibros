@@ -16,5 +16,7 @@ namespace RegistroLibros.Models
         [Required(ErrorMessage = "Este campo es obligatorio")]
         public int? AnioPublicacion { get; set; }
 
+        public bool Disponible { get; set; } = true;
+
     }
 }

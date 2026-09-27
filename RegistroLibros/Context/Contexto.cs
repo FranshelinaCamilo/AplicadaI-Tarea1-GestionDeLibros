@@ -10,5 +10,6 @@ namespace RegistroLibros.Context
         }
         public DbSet<Libros> Libros { get; set; } = null!;
         public DbSet<Estudiantes> Estudiantes { get; set; } = null!;
+        public DbSet<Prestamos> Prestamos { get; set; } = null!;
     }
 }
