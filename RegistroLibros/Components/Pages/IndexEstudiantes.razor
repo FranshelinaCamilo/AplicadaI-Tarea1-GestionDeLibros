@@ -1,114 +1,125 @@
-﻿@page "/IndexEstudiantes"
+﻿@page "/Estudiantes/Index"
 @rendermode InteractiveServer
 
-<PageTitle>Estudiantes Registrados</PageTitle>
-
-<ConfirmDialog @ref="dialog" />
-
-<div class="p-3 border rounded">
-
-    <div class=" justify-content-between align-items-lg-center d-flex">
-        <h4>Consulta de Estudiantes</h4>
-        <a href="/CrearEstudiante" class="btn btn-primary">Crear +</a>
-    </div>
-
-    <div class="p-3 border mt-3">
-
-        <div class="d-flex" style="gap: 185px">
-            <label>Filtra por</label>
-            <label>Busqueda</label>
+<PageTitle>Registro de Estudiantes</PageTitle>
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-center mb-4">
+            <h5 class="card-title mt-2">Registro de Estudiantes</h5>
+            <a href="/Estudiante/Crear" class="btn btn-primary"> <span class="bi bi-plus-square mt-3"></span> Crear</a>
         </div>
 
-        <div class="row align-items-center">
-            <div class="col-3">
-                <select class="form-select" @bind="filtroPor">
-                    <option value="" disabled>Selecciona una opcion</option>
-                    <option value="EstudianteId">EstudianteId</option>
-                    <option value="Nombres">Nombres</option>
-                    <option value="Email">Email</option>
-                </select>
-            </div>
+        <div class="card-body">
 
-            <div class="col-4">
-                <div class="input-group">
-                    <input class="form-control" @bind="filtro" placeholder="Buscar" />
-                    <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+            @*labels*@
+            <div class="row">
+
+                @*Filtrar por*@
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Filtrar por</strong></label>
+                </div>
+
+                @*ValorFiltro*@
+                <div class="col-4">
+                    <label class="col-form-label"><strong>B&uacute;squeda</strong></label>
                 </div>
             </div>
+
+            @*Inputs y botones*@
+            <div class="row align-items-center">
+                @*filtro*@
+                <div class="col-3">
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="" selected disabled>Elija una opci&oacute;n</option>
+                        <option value="Id">ID</option>
+                        <option value="Nombre">Nombre</option>
+                        <option value="Email">Email</option>
+                    </InputSelect>
+                </div>
+
+                @*Busqueda*@
+                <div class="col-4">
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="grid mt-3">
+                <QuickGrid Items="@estudiantes.AsQueryable()">
+                    <PropertyColumn Property="@(e => e.EstudianteId)" title="Id" Sortable="true" />
+                    <PropertyColumn Property="@(e => e.Nombres)" title="Nombre" Sortable="true" Align="Align.Left" />
+                    <PropertyColumn Property="@(e => e.Direccion)" title="Direcci&oacute;n" Sortable="true" Align="Align.Left" />
+                    <PropertyColumn Property="@(e => e.Email)" title="Email" Sortable="true" Align="Align.Left" />
+                    <PropertyColumn Property="@(e => e.FechaNacimiento)" title="Fecha de Nacimiento" Sortable="true" Align="Align.Left" />
+                    <TemplateColumn Title="Opciones">
+                        <a href="/Estudiante/Modificar/@context.EstudianteId" class="btn btn-outline-primary bi bi-pencil-square"></a>
+
+                        <button class="btn btn-outline-danger bi bi-trash" @onclick="() => MostrarModal(context)"></button>
+                    </TemplateColumn>
+                </QuickGrid>
+            </div>
+
         </div>
 
-        <table class="table bordered" style="margin-top: 20px;">
-            <thead>
-                <tr>
-                    <th>EstudianteId</th>
-                    <th>Nombres</th>
-                    <th>Direccion</th>
-                    <th>Email</th>
-                    <th>Fecha Nacimiento</th>
-                    <th>Opciones</th>
-                </tr>          
-            </thead>
-            <tbody>
+        <div class="card-footer d-flex justify-content-between align-center mb-4">
+            <label>Cantidad:  @estudiantes.Count()</label>
+        </div>
 
-                @foreach(var estudiante in estudiantes){
-                    <tr>
-                        <td>@estudiante.EstudianteId</td>
-                        <td>@estudiante.Nombres</td>
-                        <td>@estudiante.Direccion</td>
-                        <td>@estudiante.Email</td>
-                        <td>@estudiante.FechaNacimiento</td>
-                        <td>
-                            <a href="@($"/modificarEstudiante/{estudiante.EstudianteId}")" class="btn btn-primary bi bi-pencil-square" ></a>
-                            <button class="btn btn-danger bi bi-trash" @onclick="() => Eliminar(estudiante)"></button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
     </div>
-    <p style="margin-top: 10px;">Cantidad: @estudiantes.Count</p>
+
 </div>
 
+@* Modal de confirmación *@
+<Modal @ref="modal" Title="Confirmar Eliminación">
+
+    <BodyTemplate>
+        ¿Está seguro de que desea eliminar el estudiante "@estudianteSeleccionado.Nombres"?
+    </BodyTemplate>
+
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick"> No </Button>
+        <Button Color="ButtonColor.Danger" @onclick="Eliminar"> Si </Button>
+    </FooterTemplate>
+
+</Modal>
+
 @code {
-
-    private ConfirmDialog dialog = default!;
     private List<Estudiantes> estudiantes = new();
+    private Estudiantes estudianteSeleccionado = new();
+    private Modal modal;
 
-    private string filtro { get; set; } = string.Empty;
-    private string filtroPor { get; set; } = string.Empty;
+    private string Filtro { get; set; } = string.Empty;
+    private string ValorFiltro { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
         estudiantes = await estudianteService.GetList(e => true);
     }
 
-    private async Task Eliminar(Estudiantes estudiante)
+    private async Task MostrarModal(Estudiantes estudiante)
     {
-
-        var opciones = new ConfirmDialogOptions
-        {
-            YesButtonText = "Eliminar",
-            YesButtonColor = ButtonColor.Danger,
-            NoButtonText = "Cancelar",
-            NoButtonColor = ButtonColor.Secondary,
-            IsVerticallyCentered = true
-        };
-
-        bool confirmar = await dialog.ShowAsync(
-            title: "Eliminar estudiante",
-            message1: $"¿Está seguro de que desea eliminar al estudiante \"{estudiante.Nombres}\"?",
-            confirmDialogOptions: opciones);
-
-        if (!confirmar)
-            return;
+        estudianteSeleccionado = estudiante;
+        await modal.ShowAsync();
+    }
 
 
-        bool resultado = await estudianteService.Eliminar(estudiante.EstudianteId);
+    private async Task OnHideModalClick()
+    {
+        await modal.HideAsync();
+    }
 
-        if (resultado)
+    private async Task Eliminar()
+    {
+        bool eliminado = await estudianteService.Eliminar(estudianteSeleccionado.EstudianteId);
+
+        if (eliminado)
         {
             estudiantes = await estudianteService.GetList(e => true);
             toastService.ShowSuccess("Estudiante eliminado correctamente.");
+            await modal.HideAsync();
         }
         else
         {
@@ -118,25 +129,25 @@
 
     private async Task Buscar()
     {
-        if(filtro == "")
+        if (ValorFiltro == "")
         {
             estudiantes = await estudianteService.GetList(e => true);
         }
-        else if (filtro.Trim() != "" && filtroPor == "EstudianteId")
+        else if (ValorFiltro.Trim() != "" && Filtro == "Id")
         {
             estudiantes = await estudianteService.GetList(e =>
-                e.EstudianteId.ToString().Contains(filtro));
+                e.EstudianteId.ToString().Contains(ValorFiltro));
         }
-        else if (filtro.Trim() != "" && filtroPor == "Nombres")
+        else if (ValorFiltro.Trim() != "" && Filtro == "Nombre")
         {
             estudiantes = await estudianteService.GetList(e =>
-                e.Nombres.ToLower().Contains(filtro.ToLower()));
+                e.Nombres.ToLower().Contains(ValorFiltro.ToLower()));
         }
-        else if (filtro.Trim() != "" && filtroPor == "Email")
+        else if (ValorFiltro.Trim() != "" && Filtro == "Email")
         {
             estudiantes = await estudianteService.GetList(e =>
-                e.Email.ToLower().Contains(filtro.ToLower()));
+                e.Email.ToLower().Contains(ValorFiltro.ToLower()));
         }
-        
+
     }
 }

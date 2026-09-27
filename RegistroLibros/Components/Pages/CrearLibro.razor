@@ -1,64 +1,75 @@
-﻿@page "/crearLibro"
+﻿@page "/Libro/Crear"
 @rendermode InteractiveServer
 
-<PageTitle>Crear Libro</PageTitle>
-
-<EditForm Model="libro" OnValidSubmit="Guardar">
+@*HTML*@
+<PageTitle>Create</PageTitle>
+<EditForm Model="Libro" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
 
-    <div class="p-4 border rounded ">
 
-        <h3>Crear Libro</h3> 
-    
-        <div class="mb-3 mt-3">
-            <label>LibroId</label>
-            <InputNumber type="number" class="form-control" @bind-Value="libro.LibroId" readonly />
-        </div>
-    
-        <div class="mb-3">
-            <label>Titulo</label>
-            <InputText type="text" class="form-control" @bind-Value="libro.Titulo" />
-            <ValidationMessage For="() => libro.Titulo" />
-        </div>
-        
-        <div class="mb-3">
-            <label>Autor</label>
-            <InputText type="text" class="form-control" @bind-Value="libro.Autor" />
-            <ValidationMessage For="() => libro.Autor" />
-        </div>
-    
-        <div class="mb-3">
-            <label>Año de Publicación</label>
-            <InputNumber type="number" class="form-control" @bind-Value="libro.AnioPublicacion" />
-            <ValidationMessage For="() => libro.AnioPublicacion" />
-        </div>
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title mt-2">Crear Libro</h5>
+            </div>
 
+            <div class="card-body ">
 
-        <div class ="d-flex justify-content-center gap-4">
-            <a href="/IndexLibro" class="btn btn-secondary bi bi-arrow-left mt-5"> Volver</a>
-            <button type="submit" class="btn btn-primary mt-5 bi bi-save"> Guardar</button>
+                @*LibroId*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Id</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Libro.LibroId" readonly></InputNumber>
+                </div>
+
+                @*Titulo*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>T&iacute;tulo</strong></label>
+                    <InputText class="form-control" @bind-Value="Libro.Titulo"></InputText>
+                    <ValidationMessage For="(() => Libro.Titulo)" />
+                </div>
+
+                @*Autor*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Autor</strong></label>
+                    <InputText class="form-control" @bind-Value="Libro.Autor"></InputText>
+                    <ValidationMessage For="(() => Libro.Autor)" />
+                </div>
+
+                @*Anio de Publicacion*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>A&ntilde;o de Publicaci&oacute;n</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Libro.AnioPublicacion"></InputNumber>
+                    <ValidationMessage For="(() => Libro.AnioPublicacion)" />
+                </div>
+
+            </div>
+
+            @*footer*@
+            <div class="card-footer text-center mt-2">
+                <a href="/Libro/Index" class="btn btn-secondary"> <span class="bi bi-arrow-left"></span> Volver</a>
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar</button>
+            </div>
         </div>
-
     </div>
 </EditForm>
-
+@Mensaje
 
 @code {
+    public Libros Libro { get; set; } = new Libros();
+    public string Mensaje { get; set; } = string.Empty;
 
-    private Libro libro = new Libro();
-
-    private async Task Guardar()
+    public async Task Guardar()
     {
-        bool resultado = await libroService.Guardar(libro);
+        var creado = await libroService.Guardar(Libro);
 
-        if (resultado)
+        if (creado)
         {
-            toastService.ShowSuccess("Libro guardado correctamente.");
-            libro = new Libro();
+            toastService.ShowSuccess("Libro Guardado Correctamente");
+            navigationManager.NavigateTo("/Libros/Index");
         }
         else
         {
-            toastService.ShowError("Error al guardar el libro.");
+            toastService.ShowError("No se pudo guardar correctamente");
         }
     }
 }

@@ -8,7 +8,7 @@ namespace RegistroLibros.Context
         public Contexto(DbContextOptions<Contexto> options) : base(options)
         {
         }
-        public DbSet<Libro> Libros { get; set; } = null!;
+        public DbSet<Libros> Libros { get; set; } = null!;
         public DbSet<Estudiantes> Estudiantes { get; set; } = null!;
     }
 }
