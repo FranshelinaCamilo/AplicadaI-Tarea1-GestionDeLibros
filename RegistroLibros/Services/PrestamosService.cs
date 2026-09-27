@@ -27,6 +27,8 @@ namespace RegistroLibros.Services
         {
             await using var contexto = await contextFactory.CreateDbContextAsync();
             return await contexto.Prestamos
+                .Include(e => e.Estudiante)
+                .Include(l => l.Libro)
                 .Where(criterio)
                 .AsNoTracking()
                 .ToListAsync();

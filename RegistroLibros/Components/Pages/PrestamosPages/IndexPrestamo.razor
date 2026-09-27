@@ -1,0 +1,147 @@
+﻿@page "/Prestamos/Index"
+@rendermode InteractiveServer
+
+<PageTitle>Registro de Prestamos</PageTitle>
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-center mb-4">
+            <h5 class="card-title mt-2">Registro de Prestamos</h5>
+            <a href="/Prestamo/Crear" class="btn btn-primary"> <span class="bi bi-plus-square mt-3"></span> Crear</a>
+        </div>
+
+        <div class="card-body">
+
+            @*labels*@
+            <div class="row">
+
+                @*Filtrar por*@
+                <div class="col-3">
+                    <label class="col-form-label"><strong>Filtrar por</strong></label>
+                </div>
+
+                @*ValorFiltro*@
+                <div class="col-4">
+                    <label class="col-form-label"><strong>B&uacute;squeda</strong></label>
+                </div>
+            </div>
+
+            @*Inputs y botones*@
+            <div class="row align-items-center">
+                @*filtro*@
+                <div class="col-3">
+                    <InputSelect class="form-select" @bind-Value="Filtro">
+                        <option value="" selected disabled>Elija una opci&oacute;n</option>
+                        <option value="Estudiante">Estudiante</option>
+                        <option value="Titulo">T&iacute;tulo</option>
+                    </InputSelect>
+                </div>
+
+                @*Busqueda*@
+                <div class="col-4">
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar" />
+                        <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="grid mt-3">
+                <QuickGrid Items="@prestamos.AsQueryable()">
+                    <PropertyColumn Property="@(p => p.PrestamoId)" title="Id" Sortable="true" />
+                    <PropertyColumn Property="@(p => p.EstudianteId)" title="Id Estudiante" Sortable="true" Align="Align.Left" />
+                    <PropertyColumn Property="@(p => p.Estudiante.Nombres)" title="Nombre" Sortable="true" Align="Align.Left" />
+                    <PropertyColumn Property="@(p => p.LibroId)" title="Id Libro" Sortable="true" Align="Align.Left" />
+                    <PropertyColumn Property="@(p => p.Libro.Titulo)" title="T&iacute;tulo" Sortable="true" Align="Align.Left" />
+                    <TemplateColumn Title="Opciones">
+                        <a href="/Prestamos/Modificar/@context.EstudianteId" class="btn btn-outline-primary bi bi-pencil-square"></a>
+
+                        <button class="btn btn-outline-danger bi bi-trash" @onclick="() => MostrarModal(context)"></button>
+                    </TemplateColumn>
+                </QuickGrid>
+            </div>
+
+        </div>
+
+        <div class="card-footer d-flex justify-content-between align-center mb-4">
+            <label>Cantidad:  @prestamos.Count()</label>
+        </div>
+
+    </div>
+
+</div>
+
+@* Modal de confirmación *@
+<Modal @ref="modal" Title="Confirmar Eliminación">
+
+    <BodyTemplate>
+        ¿Está seguro de que desea eliminar el préstamo "@prestamoSeleccionado.PrestamoId"?
+    </BodyTemplate>
+
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick"> No </Button>
+        <Button Color="ButtonColor.Danger" @onclick="Eliminar"> Si </Button>
+    </FooterTemplate>
+
+</Modal>
+
+@code {
+    private List<Prestamos> prestamos = new();
+    private Prestamos prestamoSeleccionado = new();
+    private Modal modal;
+
+    private string Filtro { get; set; } = string.Empty;
+    private string ValorFiltro { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        prestamos = await prestamosService.GetList(p => true);
+    }
+
+    private async Task MostrarModal(Prestamos prestamo)
+    {
+        prestamoSeleccionado = prestamo;
+        await modal.ShowAsync();
+    }
+
+
+    private async Task OnHideModalClick()
+    {
+        await modal.HideAsync();
+    }
+
+    private async Task Eliminar()
+    {
+        bool eliminado = await prestamosService.Eliminar(prestamoSeleccionado.PrestamoId);
+
+        if (eliminado)
+        {
+            prestamos = await prestamosService.GetList(p => true);
+            toastService.ShowSuccess("Préstamo eliminado correctamente.");
+            await modal.HideAsync();
+        }
+        else
+        {
+            toastService.ShowError("Error al eliminar el préstamo.");
+        }
+    }
+
+    private async Task Buscar()
+    {
+        if (ValorFiltro == "")
+        {
+            prestamos = await prestamosService.GetList(p => true);
+        }
+        else if (ValorFiltro.Trim() != "" && Filtro == "Estudiante")
+        {
+            prestamos = await prestamosService.GetList(p =>
+                p.Estudiante.Nombres.ToLower().Contains(ValorFiltro.ToLower()));
+        }
+        else if (ValorFiltro.Trim() != "" && Filtro == "Titulo")
+        {
+            prestamos = await prestamosService.GetList(p =>
+                p.Libro.Titulo.ToLower().Contains(ValorFiltro.ToLower()));
+        }
+
+    }
+}
