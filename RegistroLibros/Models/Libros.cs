@@ -2,7 +2,7 @@
 
 namespace RegistroLibros.Models
 {
-    public class Libro
+    public class Libros
     {
         [Key]
         public int LibroId { get; set; }

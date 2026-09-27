@@ -1,51 +1,69 @@
-﻿@page "/modificarLibro/{LibroId:int}"
+﻿@page "/Libro/Modificar/{LibroId:int}"
 @rendermode InteractiveServer
 
-<PageTitle>Modificar Libro</PageTitle>
-
-
-<ConfirmDialog @ref="dialog" />
-
-<EditForm Model="libro" OnValidSubmit="Modificar">
+<PageTitle>Editar Libro</PageTitle>
+<EditForm Model="Libro" OnValidSubmit="Modificar">
     <DataAnnotationsValidator />
 
-    <div class="p-4 border rounded ">
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title mt-2">Editar Libro</h5>
+            </div>
 
-        <h3>Modificar Libro</h3> 
-    
-        <div class="mb-3 mt-3">
-            <label>LibroId</label>
-            <InputNumber type="number" class="form-control" @bind-Value="libro.LibroId" readonly />
-        </div>
-    
-        <div class="mb-3">
-            <label>Titulo</label>
-            <InputText type="text" class="form-control" @bind-Value="libro.Titulo" />
-            <ValidationMessage For="() => libro.Titulo" />
-        </div>
-        
-        <div class="mb-3">
-            <label>Autor</label>
-            <InputText type="text" class="form-control" @bind-Value="libro.Autor" />
-            <ValidationMessage For="() => libro.Autor" />
-        </div>
-    
-        <div class="mb-3">
-            <label>Año de Publicación</label>
-            <InputNumber type="number" class="form-control" @bind-Value="libro.AnioPublicacion" />
-            <ValidationMessage For="() => libro.AnioPublicacion" />
-        </div>
+            <div class="card-body">
+                @* LibroId *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>LibroId</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Libro.LibroId" readonly></InputNumber>
+                </div>
 
+                @* Titulo *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>T&iacute;tulo</strong></label>
+                    <InputText class="form-control" @bind-Value="Libro.Titulo"></InputText>
+                </div>
 
-        <div class ="d-flex justify-content-center gap-4">
-            <a href="/IndexLibro" class="btn btn-secondary bi bi-arrow-left mt-5"> Volver</a>
-            <button type="submit" class="btn btn-primary mt-5 bi bi-save"> Modificar</button>
-            <button type="button" class="btn btn-danger mt-5 bi bi-trash" @onclick="Eliminar"> Eliminar</button>
+                @* Autor *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Autor</strong></label>
+                    <InputText class="form-control" @bind-Value="Libro.Autor"></InputText>
+                </div>
+
+                @* Anio de Publicacion *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>A&ntilde;o de Publicaci&oacute;n</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Libro.AnioPublicacion"></InputNumber>
+                </div>
+
+                @* footer *@
+                <div class="card-footer text-center mt-2">
+                    <a href="/Libros/Index" class="btn btn-secondary mt-2"> <span class="bi bi-arrow-left"></span> Volver</a>
+                    <button type="submit" class="btn btn-primary bi bi-floppy mt-2"> Guardar</button>
+                    <button type="button" class="btn btn-danger bi bi-trash mt-2" @onclick="MostrarModal"> Eliminar</button>
+                </div>
+
+            </div>
+
         </div>
 
     </div>
 
 </EditForm>
+
+@* Modal de confirmación *@
+<Modal @ref="modal" Title="Confirmar Eliminación">
+
+    <BodyTemplate>
+        ¿Está seguro de que desea eliminar el libro "@Libro.Titulo"?
+    </BodyTemplate>
+
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick"> No </Button>
+        <Button Color="ButtonColor.Danger" @onclick="Eliminar"> Si </Button>
+    </FooterTemplate>
+
+</Modal>
 
 @code {
 
@@ -53,9 +71,9 @@
 
     public int LibroId { get; set; }
 
-    private Libro libro = new Libro();
+    private Libros Libro = new Libros();
 
-    private ConfirmDialog dialog = default!;
+    private Modal modal;
 
     protected override async Task OnInitializedAsync()
     {
@@ -63,17 +81,18 @@
 
         if (libroEncontrado != null)
         {
-            libro = libroEncontrado;
+            Libro = libroEncontrado;
         }
     }
 
     private async Task Modificar()
     {
-        bool resultado = await libroService.Guardar(libro);
+        bool modificado = await libroService.Guardar(Libro);
 
-        if (resultado)
+        if (modificado)
         {
-            toastService.ShowSuccess("Libro modificado correctamente.");    
+            toastService.ShowSuccess("Libro modificado correctamente.");
+            navigationManager.NavigateTo("/Libros/Index");
         }
         else
         {
@@ -82,32 +101,27 @@
         }
     }
 
+    private async Task MostrarModal()
+    {
+        await modal.ShowAsync();
+    }
+
+
+    private async Task OnHideModalClick()
+    {
+        await modal.HideAsync();
+    }
+
    private async Task Eliminar()
     {
 
-        var opciones = new ConfirmDialogOptions
-        {
-            YesButtonText = "Eliminar",
-            YesButtonColor = ButtonColor.Danger,
-            NoButtonText = "Cancelar",
-            NoButtonColor = ButtonColor.Secondary,
-            IsVerticallyCentered = true
-        };
+        bool Eliminado = await libroService.Eliminar(Libro.LibroId);
 
-        bool confirmar = await dialog.ShowAsync(
-            title: "Eliminar libro",
-            message1: $"¿Está seguro de que desea eliminar \"{libro.Titulo}\"?",
-            confirmDialogOptions: opciones);
-
-        if (!confirmar)
-            return;
-
-
-        bool resultado = await libroService.Eliminar(libro.LibroId);
-
-        if (resultado)
+        if (Eliminado)
         {
             toastService.ShowSuccess("Libro eliminado correctamente.");
+            await modal.HideAsync();
+            navigationManager.NavigateTo("/Libros/Index");
         }
         else
         {

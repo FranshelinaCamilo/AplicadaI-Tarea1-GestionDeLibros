@@ -1,57 +1,78 @@
-﻿@page "/modificarEstudiante/{EstudianteId:int}"
+﻿@page "/Estudiante/Modificar/{EstudianteId:int}"
 @rendermode InteractiveServer
 
-<PageTitle>Modificar Estudiante</PageTitle>
-
-
-<ConfirmDialog @ref="dialog" />
-
-<EditForm Model="estudiante" OnValidSubmit="Modificar">
+<PageTitle>Editar Libro</PageTitle>
+<EditForm Model="Estudiante" OnValidSubmit="Modificar">
     <DataAnnotationsValidator />
 
-    <div class="p-4 border rounded ">
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title mt-2">Editar Libro</h5>
+            </div>
 
-        <h3>Modificar Estudiante</h3> 
-    
-        <div class="mb-3 mt-3">
-            <label>EstudianteId</label>
-            <InputNumber type="number" class="form-control" @bind-Value="estudiante.EstudianteId" readonly />
-        </div>
-    
-        <div class="mb-3">
-            <label>Nombre</label>
-            <InputText type="text" class="form-control" @bind-Value="estudiante.Nombres" />
-            <ValidationMessage For="() => estudiante.Nombres" />
-        </div>
-        
-        <div class="mb-3">
-            <label>Dirección</label>
-            <InputText type="text" class="form-control" @bind-Value="estudiante.Direccion" />
-            <ValidationMessage For="() => estudiante.Direccion" />
-        </div>
-    
-        <div class="mb-3">
-            <label>Email</label>
-            <InputText type="email" class="form-control" @bind-Value="estudiante.Email" />
-            <ValidationMessage For="() => estudiante.Email" />
-        </div>
+            <div class="card-body">
+                @* EstudianteId *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>EstudianteId</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Estudiante.EstudianteId" readonly></InputNumber>
+                </div>
 
-        <div class="mb-3">
-            <label>Fecha de Nacimiento</label>
-            <InputDate TValue="DateOnly" class="form-control" @bind-Value="estudiante.FechaNacimiento" />
-            <ValidationMessage For="() => estudiante.FechaNacimiento" />
-        </div>
+                @* Nombres *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Nombre</strong></label>
+                    <InputText class="form-control" @bind-Value="Estudiante.Nombres"></InputText>
+                </div>
 
+                @* Direccion *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Direcci&oacute;n</strong></label>
+                    <InputText class="form-control" @bind-Value="Estudiante.Direccion"></InputText>
+                </div>
 
-        <div class ="d-flex justify-content-center gap-4">
-            <a href="/IndexEstudiantes" class="btn btn-secondary bi bi-arrow-left mt-5"> Volver</a>
-            <button type="submit" class="btn btn-primary mt-5 bi bi-save"> Modificar</button>
-            <button type="button" class="btn btn-danger mt-5 bi bi-trash" @onclick="Eliminar"> Eliminar</button>
+                @* Email *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Email</strong></label>
+                    <InputText class="form-control" typeof="email" @bind-Value="Estudiante.Email"></InputText>
+                </div>
+
+                @* Fecha de Nacimiento *@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fecha de Nacimiento</strong></label>
+                    <InputDate TValue="DateOnly" class="form-control" typeof="email" @bind-Value="Estudiante.FechaNacimiento"></InputDate>
+                </div>
+
+                @* footer *@
+                <div class="card-footer text-center mt-2">
+                    <a href="/Estudiantes/Index" class="btn btn-secondary mt-2"> <span class="bi bi-arrow-left"></span> Volver</a>
+                    <button type="submit" class="btn btn-primary bi bi-floppy mt-2"> Guardar</button>
+                    <button type="button" class="btn btn-danger bi bi-trash mt-2" @onclick="Eliminar"> Eliminar</button>
+                </div>
+
+            </div>
+
         </div>
 
     </div>
 
 </EditForm>
+
+@* Modal de confirmación *@
+<Modal @ref="modal" Title="Confirmar Eliminación">
+
+    <BodyTemplate>
+        ¿Está seguro de que desea eliminar al estudiante "@Estudiante.Nombres"?
+    </BodyTemplate>
+
+    <FooterTemplate>
+
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick"> No </Button>
+
+        <Button Color="ButtonColor.Danger" @onclick="MostrarModal"> Si </Button>
+
+    </FooterTemplate>
+
+</Modal>
 
 @code {
 
@@ -59,9 +80,9 @@
 
     public int EstudianteId { get; set; }
 
-    private Estudiantes estudiante = new Estudiantes();
+    private Estudiantes Estudiante = new Estudiantes();
 
-    private ConfirmDialog dialog = default!;
+    private Modal modal;
 
     protected override async Task OnInitializedAsync()
     {
@@ -69,17 +90,18 @@
 
         if (estudianteEncontrado != null)
         {
-            estudiante = estudianteEncontrado;
+            Estudiante = estudianteEncontrado;
         }
     }
 
     private async Task Modificar()
     {
-        bool resultado = await estudianteService.Guardar(estudiante);
+        bool Modificado = await estudianteService.Guardar(Estudiante);
 
-        if (resultado)
+        if (Modificado)
         {
-            toastService.ShowSuccess("Estudiante modificado correctamente.");    
+            toastService.ShowSuccess("Estudiante modificado correctamente."); 
+            navigationManager.NavigateTo("/Estudiantes/Index");
         }
         else
         {
@@ -88,32 +110,26 @@
         }
     }
 
-   private async Task Eliminar()
+    private async Task MostrarModal()
     {
-
-        var opciones = new ConfirmDialogOptions
-        {
-            YesButtonText = "Eliminar",
-            YesButtonColor = ButtonColor.Danger,
-            NoButtonText = "Cancelar",
-            NoButtonColor = ButtonColor.Secondary,
-            IsVerticallyCentered = true
-        };
-
-        bool confirmar = await dialog.ShowAsync(
-            title: "Eliminar estudiante",
-            message1: $"¿Está seguro de que desea eliminar al estudiante \"{estudiante.Nombres}\"?",
-            confirmDialogOptions: opciones);
-
-        if (!confirmar)
-            return;
+        await modal.ShowAsync();
+    }
 
 
-        bool resultado = await estudianteService.Eliminar(estudiante.EstudianteId);
+    private async Task OnHideModalClick()
+    {
+        await modal.HideAsync();
+    }
 
-        if (resultado)
+   private async Task Eliminar()
+   {
+        bool Eliminado = await estudianteService.Eliminar(Estudiante.EstudianteId);
+
+        if (Eliminado)
         {
             toastService.ShowSuccess("Estudiante eliminado correctamente.");
+            await modal.HideAsync();
+            navigationManager.NavigateTo("/Estudiantes/Index");
         }
         else
         {

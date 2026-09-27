@@ -6,9 +6,9 @@ using System.Linq.Expressions;
 
 namespace RegistroLibros.Services
 {
-    public class LibroService(IDbContextFactory<Contexto> contextFactory) : IService<Libro, int>
+    public class LibroService(IDbContextFactory<Contexto> contextFactory) : IService<Libros, int>
     {
-        public async Task<Libro?> Buscar(int LibroId)
+        public async Task<Libros?> Buscar(int LibroId)
         {
             await using var contexto = await contextFactory.CreateDbContextAsync();
             return await contexto.Libros
@@ -23,7 +23,7 @@ namespace RegistroLibros.Services
                 .ExecuteDeleteAsync() > 0;
         }
 
-        public async Task<List<Libro>> GetList(Expression<Func<Libro, bool>> criterio)
+        public async Task<List<Libros>> GetList(Expression<Func<Libros, bool>> criterio)
         {
             await using var contexto = await contextFactory.CreateDbContextAsync();
             return await contexto.Libros
@@ -32,7 +32,7 @@ namespace RegistroLibros.Services
                 .ToListAsync();
         }
 
-        public async Task<bool> Guardar(Libro libro)
+        public async Task<bool> Guardar(Libros libro)
         {
             if (!await Existe(libro.LibroId))
             {
@@ -61,14 +61,14 @@ namespace RegistroLibros.Services
                 .AnyAsync(t => t.Titulo == titulo);
         }
 
-        private async Task<bool> Insertar(Libro libro)
+        private async Task<bool> Insertar(Libros libro)
         {
             await using var contexto = await contextFactory.CreateDbContextAsync();
             contexto.Libros.Add(libro);
             return await contexto.SaveChangesAsync() > 0; 
         }
 
-        private async Task<bool> Modificar (Libro libro)
+        private async Task<bool> Modificar (Libros libro)
         {
             await using var contexto = await contextFactory.CreateDbContextAsync();
             contexto.Update(libro);
