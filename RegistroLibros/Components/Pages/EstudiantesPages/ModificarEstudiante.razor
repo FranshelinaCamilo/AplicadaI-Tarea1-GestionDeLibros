@@ -46,7 +46,7 @@
                 <div class="card-footer text-center mt-2">
                     <a href="/Estudiantes/Index" class="btn btn-secondary mt-2"> <span class="bi bi-arrow-left"></span> Volver</a>
                     <button type="submit" class="btn btn-primary bi bi-floppy mt-2"> Guardar</button>
-                    <button type="button" class="btn btn-danger bi bi-trash mt-2" @onclick="Eliminar"> Eliminar</button>
+                    <button type="button" class="btn btn-danger bi bi-trash mt-2" @onclick="MostrarModal"> Eliminar</button>
                 </div>
 
             </div>
@@ -68,7 +68,7 @@
 
         <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick"> No </Button>
 
-        <Button Color="ButtonColor.Danger" @onclick="MostrarModal"> Si </Button>
+        <Button Color="ButtonColor.Danger" @onclick="Eliminar"> Si </Button>
 
     </FooterTemplate>
 
