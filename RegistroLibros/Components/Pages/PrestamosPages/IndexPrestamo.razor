@@ -6,7 +6,7 @@
     <div class="card shadow-lg">
         <div class="card-header d-flex justify-content-between align-center mb-4">
             <h5 class="card-title mt-2">Registro de Prestamos</h5>
-            <a href="/Prestamo/Crear" class="btn btn-primary"> <span class="bi bi-plus-square mt-3"></span> Crear</a>
+            <a href="/Prestamos/Crear" class="btn btn-primary"> <span class="bi bi-plus-square mt-3"></span> Crear</a>
         </div>
 
         <div class="card-body">
@@ -48,7 +48,7 @@
 
             <div class="grid mt-3">
                 <QuickGrid Items="@prestamos.AsQueryable()">
-                    <PropertyColumn Property="@(p => p.PrestamoId)" title="Id" Sortable="true" />
+                    <PropertyColumn Property="@(p => p.PrestamoId)" title="Id Pr&eacute;stamo" Sortable="true" />
                     <PropertyColumn Property="@(p => p.EstudianteId)" title="Id Estudiante" Sortable="true" Align="Align.Left" />
                     <PropertyColumn Property="@(p => p.Estudiante.Nombres)" title="Nombre" Sortable="true" Align="Align.Left" />
                     <PropertyColumn Property="@(p => p.LibroId)" title="Id Libro" Sortable="true" Align="Align.Left" />
