@@ -8,30 +8,6 @@ namespace RegistroLibros.Services;
 
 public class LibrosService(IDbContextFactory<Contexto> contextFactory) : IService<Libros, int>
 {
-    public async Task<Libros?> Buscar(int LibroId)
-    {
-        await using var contexto = await contextFactory.CreateDbContextAsync();
-        return await contexto.Libros
-            .FirstOrDefaultAsync(l => l.LibroId == LibroId);
-    }
-
-    public async Task<bool> Eliminar(int LibroId)
-    {
-        await using var contexto = await contextFactory.CreateDbContextAsync();
-        return await contexto.Libros
-            .Where(l => l.LibroId == LibroId)
-            .ExecuteDeleteAsync() > 0;
-    }
-
-    public async Task<List<Libros>> GetList(Expression<Func<Libros, bool>> criterio)
-    {
-        await using var contexto = await contextFactory.CreateDbContextAsync();
-        return await contexto.Libros
-            .Where(criterio)
-            .AsNoTracking()
-            .ToListAsync();
-    }
-
     public async Task<bool> Guardar(Libros libro)
     {
         if (!await Existe(libro.LibroId))
@@ -73,5 +49,29 @@ public class LibrosService(IDbContextFactory<Contexto> contextFactory) : IServic
         await using var contexto = await contextFactory.CreateDbContextAsync();
         contexto.Update(libro);
         return await contexto.SaveChangesAsync() > 0;
+    }
+
+    public async Task<Libros?> Buscar(int LibroId)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        return await contexto.Libros
+            .FirstOrDefaultAsync(l => l.LibroId == LibroId);
+    }
+
+    public async Task<List<Libros>> GetList(Expression<Func<Libros, bool>> criterio)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        return await contexto.Libros
+            .Where(criterio)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<bool> Eliminar(int LibroId)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        return await contexto.Libros
+            .Where(l => l.LibroId == LibroId)
+            .ExecuteDeleteAsync() > 0;
     }
 }
