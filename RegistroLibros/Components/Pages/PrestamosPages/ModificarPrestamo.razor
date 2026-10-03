@@ -87,8 +87,8 @@
     protected override async Task OnInitializedAsync()
     {
         Prestamo = await prestamosService.Buscar(PrestamoId);
-        estudiantes = await estudianteService.GetList(e => e.EstudianteId > 0);
-        libros = await libroService.GetList(l => l.LibroId > 0 && l.Disponible == true);
+        estudiantes = await estudiantesService.GetList(e => e.EstudianteId > 0);
+        libros = await librosService.GetList(l => l.LibroId > 0);
     }
 
     private async Task Modificar()

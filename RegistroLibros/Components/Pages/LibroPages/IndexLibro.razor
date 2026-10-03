@@ -95,7 +95,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        libros = await libroService.GetList(l => true);
+        libros = await librosService.GetList(l => true);
     }
 
     private async Task MostrarModal(Libros libro)
@@ -113,11 +113,11 @@
     private async Task Eliminar()
     {
 
-        bool eliminado = await libroService.Eliminar(libroSeleccionado.LibroId);
+        bool eliminado = await librosService.Eliminar(libroSeleccionado.LibroId);
 
         if (eliminado)
         {
-            libros = await libroService.GetList(l => true);
+            libros = await librosService.GetList(l => true);
             toastService.ShowSuccess("Libro eliminado correctamente.");
             await modal.HideAsync();
         }
@@ -131,30 +131,30 @@
     {
         if(ValorFiltro == "")
         {
-            libros = await libroService.GetList(l => true);
+            libros = await librosService.GetList(l => true);
         }
         else if (ValorFiltro.Trim() != "" && Filtro.Trim() == "Autor")
         {
-            libros = await libroService.GetList(l =>
+            libros = await librosService.GetList(l =>
                 l.Autor.ToLower().Contains(ValorFiltro.ToLower()));
         }
         else if (Filtro.Trim() != "" && Filtro.Trim() == "Titulo")
         {
-            libros = await libroService.GetList(l =>
+            libros = await librosService.GetList(l =>
                 l.Titulo.ToLower().Contains(ValorFiltro.ToLower()));
         }
         else if (Filtro.Trim() != "" && Filtro.Trim() == "LibroId")
         {
             if (int.TryParse(ValorFiltro, out int id))
             {
-                libros = await libroService.GetList(l => l.LibroId == id);
+                libros = await librosService.GetList(l => l.LibroId == id);
             }
         }
         else if (Filtro.Trim() != "" && Filtro.Trim() == "AnioPublicacion")
         {
             if (int.TryParse(ValorFiltro, out int anio))
             {
-                libros = await libroService.GetList(l => l.AnioPublicacion == anio);
+                libros = await librosService.GetList(l => l.AnioPublicacion == anio);
             }
         }
         

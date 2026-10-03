@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace RegistroLibros.Services
 {
-    public class EstudianteService(IDbContextFactory<Contexto> contextFactory): IService<Estudiantes, int>
+    public class EstudiantesService(IDbContextFactory<Contexto> contextFactory): IService<Estudiantes, int>
     {
         public async Task<Estudiantes?> Buscar(int EstudianteId)
         {

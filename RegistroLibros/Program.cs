@@ -12,8 +12,8 @@ builder.Services.AddRazorComponents()
 var ConStr = builder.Configuration.GetConnectionString("ConStr");
 builder.Services.AddDbContextFactory<Contexto>(o => o.UseSqlServer(ConStr));
 
-builder.Services.AddScoped<LibroService>();
-builder.Services.AddScoped<EstudianteService>();
+builder.Services.AddScoped<LibrosService>();
+builder.Services.AddScoped<EstudiantesService>();
 builder.Services.AddScoped<PrestamosService>();
 
 builder.Services.AddBlazorBootstrap();

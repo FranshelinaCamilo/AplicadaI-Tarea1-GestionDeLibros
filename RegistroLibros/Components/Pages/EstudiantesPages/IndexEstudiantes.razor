@@ -31,7 +31,7 @@
                 <div class="col-3">
                     <InputSelect class="form-select" @bind-Value="Filtro">
                         <option value="" selected disabled>Elija una opci&oacute;n</option>
-                        <option value="Id">ID</option>
+                        <option value="Id">Id</option>
                         <option value="Nombre">Nombre</option>
                         <option value="Email">Email</option>
                     </InputSelect>
@@ -44,7 +44,6 @@
                         <button type="button" class="btn btn-outline-primary bi bi-search" @onclick="Buscar"></button>
                     </div>
                 </div>
-
             </div>
 
             <div class="grid mt-3">
@@ -96,7 +95,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        estudiantes = await estudianteService.GetList(e => true);
+        estudiantes = await estudiantesService.GetList(e => true);
     }
 
     private async Task MostrarModal(Estudiantes estudiante)
@@ -113,11 +112,11 @@
 
     private async Task Eliminar()
     {
-        bool eliminado = await estudianteService.Eliminar(estudianteSeleccionado.EstudianteId);
+        bool eliminado = await estudiantesService.Eliminar(estudianteSeleccionado.EstudianteId);
 
         if (eliminado)
         {
-            estudiantes = await estudianteService.GetList(e => true);
+            estudiantes = await estudiantesService.GetList(e => true);
             toastService.ShowSuccess("Estudiante eliminado correctamente.");
             await modal.HideAsync();
         }
@@ -131,21 +130,21 @@
     {
         if (ValorFiltro == "")
         {
-            estudiantes = await estudianteService.GetList(e => true);
+            estudiantes = await estudiantesService.GetList(e => true);
         }
         else if (ValorFiltro.Trim() != "" && Filtro == "Id")
         {
-            estudiantes = await estudianteService.GetList(e =>
+            estudiantes = await estudiantesService.GetList(e =>
                 e.EstudianteId.ToString().Contains(ValorFiltro));
         }
         else if (ValorFiltro.Trim() != "" && Filtro == "Nombre")
         {
-            estudiantes = await estudianteService.GetList(e =>
+            estudiantes = await estudiantesService.GetList(e =>
                 e.Nombres.ToLower().Contains(ValorFiltro.ToLower()));
         }
         else if (ValorFiltro.Trim() != "" && Filtro == "Email")
         {
-            estudiantes = await estudianteService.GetList(e =>
+            estudiantes = await estudiantesService.GetList(e =>
                 e.Email.ToLower().Contains(ValorFiltro.ToLower()));
         }
 
