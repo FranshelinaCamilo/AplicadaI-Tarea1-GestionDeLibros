@@ -17,5 +17,4 @@ public class Libros
     public int? AnioPublicacion { get; set; }
 
     public bool Disponible { get; set; } = true;
-
 }
