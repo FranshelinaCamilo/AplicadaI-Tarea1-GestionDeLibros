@@ -1,22 +1,21 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RegistroLibros.Models
+namespace RegistroLibros.Models;
+
+public class Libros
 {
-    public class Libros
-    {
-        [Key]
-        public int LibroId { get; set; }
+    [Key]
+    public int LibroId { get; set; }
 
-        [Required(ErrorMessage = "Este campo es obligatorio")]
-        public string Titulo { get; set; } = null!;
+    [Required(ErrorMessage = "Este campo es obligatorio")]
+    public string Titulo { get; set; } = null!;
 
-        [Required(ErrorMessage = "Este campo es obligatorio")]
-        public string Autor { get; set; } = null!;
+    [Required(ErrorMessage = "Este campo es obligatorio")]
+    public string Autor { get; set; } = null!;
 
-        [Required(ErrorMessage = "Este campo es obligatorio")]
-        public int? AnioPublicacion { get; set; }
+    [Required(ErrorMessage = "Este campo es obligatorio")]
+    public int? AnioPublicacion { get; set; }
 
-        public bool Disponible { get; set; } = true;
+    public bool Disponible { get; set; } = true;
 
-    }
 }
