@@ -77,7 +77,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var libroEncontrado = await libroService.Buscar(LibroId);
+        var libroEncontrado = await librosService.Buscar(LibroId);
 
         if (libroEncontrado != null)
         {
@@ -87,7 +87,7 @@
 
     private async Task Modificar()
     {
-        bool modificado = await libroService.Guardar(Libro);
+        bool modificado = await librosService.Guardar(Libro);
 
         if (modificado)
         {
@@ -115,7 +115,7 @@
    private async Task Eliminar()
     {
 
-        bool Eliminado = await libroService.Eliminar(Libro.LibroId);
+        bool Eliminado = await librosService.Eliminar(Libro.LibroId);
 
         if (Eliminado)
         {
