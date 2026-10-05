@@ -31,9 +31,9 @@
                 <div class="col-3">
                     <InputSelect class="form-select" @bind-Value="Filtro">
                         <option value="" selected disabled>Elija una opci&oacute;n</option>
-                        <option value="Id">ID</option>
-                        <option value="Nombre">Nombre</option>
-                        <option value="Email">Email</option>
+                        <option value="LibroId">Id</option>
+                        <option value="Titulo">T&iacute;tulo</option>
+                        <option value="Autor">Autor</option>
                     </InputSelect>
                 </div>
 
@@ -48,7 +48,7 @@
             </div>
 
             <div class="grid mt-3">
-                <QuickGrid Items="@libros.AsQueryable()">
+                <QuickGrid Items="@itemsQueryable">
                     <PropertyColumn Property="@(e => e.LibroId)" title="Id" Sortable="true" />
                     <PropertyColumn Property="@(e => e.Titulo)" title="Titulo" Sortable="true" Align="Align.Left" />
                     <PropertyColumn Property="@(e => e.Autor)" title="Autor" Sortable="true" Align="Align.Left" />
@@ -56,7 +56,7 @@
                     <TemplateColumn Title="Opciones">
                         <a href="/Libro/Modificar/@context.LibroId" class="btn btn-outline-primary bi bi-pencil-square"></a>
 
-                        <button class="btn btn-outline-danger bi bi-trash" @onclick="() => MostrarModal(context)"></button>
+                        <button class="btn btn-outline-danger bi bi-trash" data-bs-toggle="modal" data-bs-target="#modalEliminar" @onclick="() => libro = context"></button>
                     </TemplateColumn>
                 </QuickGrid>
             </div>
@@ -64,62 +64,59 @@
         </div>
 
         <div class="card-footer d-flex justify-content-between align-center mb-4">
-            <label>Cantidad:  @libros.Count()</label>
+            <label class="ms-3"> <strong> Cantidad:</strong>  @itemsQueryable?.Count()</label>
         </div>
 
     </div>
 
 </div>
 
-@* Modal de confirmación *@
-<Modal @ref="modal" Title="Confirmar Eliminación">
+@*Modal eliminacion*@
+<div class="modal" id="modalEliminar" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"> Confirmar Eliminaci&oacute;n</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                @if (libro != null)
+                {
 
-    <BodyTemplate>
-        ¿Está seguro de que desea eliminar el libro "@libroSeleccionado.Titulo"?
-    </BodyTemplate>
-
-    <FooterTemplate>
-        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick"> No </Button>
-        <Button Color="ButtonColor.Danger" @onclick="Eliminar"> Si </Button>
-    </FooterTemplate>
-
-</Modal>
+                    <p>¿Esta seguro que desea eliminar este libro?</p>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" @onclick="Eliminar">Confirmar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
-    private List<Libros> libros = new();
-    private Modal modal;
-    private Libros libroSeleccionado = new();
+    private IQueryable<Libros> itemsQueryable;
+    private Libros libro = new();
 
     private string Filtro { get; set; } = string.Empty;
     private string ValorFiltro { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        libros = await librosService.GetList(l => true);
-    }
-
-    private async Task MostrarModal(Libros libro)
-    {
-        libroSeleccionado = libro;
-        await modal.ShowAsync();
-    }
-
-
-    private async Task OnHideModalClick()
-    {
-        await modal.HideAsync();
+        var items = await librosService.GetList(l => true);
+        itemsQueryable = items.AsQueryable();
     }
 
     private async Task Eliminar()
     {
 
-        bool eliminado = await librosService.Eliminar(libroSeleccionado.LibroId);
+        bool eliminado = await librosService.Eliminar(libro.LibroId);
 
         if (eliminado)
         {
-            libros = await librosService.GetList(l => true);
+            var items = await librosService.GetList(l => true);
+            itemsQueryable = items.AsQueryable();
             toastService.ShowSuccess("Libro eliminado correctamente.");
-            await modal.HideAsync();
         }
         else
         {
@@ -129,34 +126,28 @@
 
     private async Task Buscar()
     {
-        if(ValorFiltro == "")
+        if (ValorFiltro == "")
         {
-            libros = await librosService.GetList(l => true);
+            var items = await librosService.GetList(l => true);
+            itemsQueryable = items.AsQueryable();
         }
         else if (ValorFiltro.Trim() != "" && Filtro.Trim() == "Autor")
         {
-            libros = await librosService.GetList(l =>
-                l.Autor.ToLower().Contains(ValorFiltro.ToLower()));
+            var Autor = await librosService.GetList(l => l.Autor.ToLower().Contains(ValorFiltro.ToLower()));
+            itemsQueryable = Autor.AsQueryable();
         }
         else if (Filtro.Trim() != "" && Filtro.Trim() == "Titulo")
         {
-            libros = await librosService.GetList(l =>
-                l.Titulo.ToLower().Contains(ValorFiltro.ToLower()));
+            var Titulo = await librosService.GetList(l => l.Titulo.ToLower().Contains(ValorFiltro.ToLower()));
+            itemsQueryable = Titulo.AsQueryable();
         }
         else if (Filtro.Trim() != "" && Filtro.Trim() == "LibroId")
         {
             if (int.TryParse(ValorFiltro, out int id))
             {
-                libros = await librosService.GetList(l => l.LibroId == id);
+                var Id = await librosService.GetList(l => l.LibroId == id);
+                itemsQueryable = Id.AsQueryable();
             }
         }
-        else if (Filtro.Trim() != "" && Filtro.Trim() == "AnioPublicacion")
-        {
-            if (int.TryParse(ValorFiltro, out int anio))
-            {
-                libros = await librosService.GetList(l => l.AnioPublicacion == anio);
-            }
-        }
-        
     }
 }

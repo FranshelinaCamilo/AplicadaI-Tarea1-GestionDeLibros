@@ -47,7 +47,7 @@
             </div>
 
             <div class="grid mt-3">
-                <QuickGrid Items="@estudiantes.AsQueryable()">
+                <QuickGrid Items="@itemsQueryable">
                     <PropertyColumn Property="@(e => e.EstudianteId)" title="Id" Sortable="true" />
                     <PropertyColumn Property="@(e => e.Nombres)" title="Nombre" Sortable="true" Align="Align.Left" />
                     <PropertyColumn Property="@(e => e.Direccion)" title="Direcci&oacute;n" Sortable="true" Align="Align.Left" />
@@ -56,7 +56,7 @@
                     <TemplateColumn Title="Opciones">
                         <a href="/Estudiante/Modificar/@context.EstudianteId" class="btn btn-outline-primary bi bi-pencil-square"></a>
 
-                        <button class="btn btn-outline-danger bi bi-trash" @onclick="() => MostrarModal(context)"></button>
+                        <button class="btn btn-outline-danger bi bi-trash"data-bs-toggle ="modal" data-bs-target="#modalEliminar" @onclick="() => estudiante = context"></button>
                     </TemplateColumn>
                 </QuickGrid>
             </div>
@@ -64,61 +64,58 @@
         </div>
 
         <div class="card-footer d-flex justify-content-between align-center mb-4">
-            <label>Cantidad:  @estudiantes.Count()</label>
+            <label><strong>Cantidad: </strong> @itemsQueryable?.Count()</label>
         </div>
 
     </div>
 
 </div>
 
-@* Modal de confirmación *@
-<Modal @ref="modal" Title="Confirmar Eliminación">
+@*Modal eliminacion*@
+<div class="modal" id="modalEliminar" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"> Confirmar Eliminaci&oacute;n</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                @if (estudiante != null)
+                {
 
-    <BodyTemplate>
-        ¿Está seguro de que desea eliminar el estudiante "@estudianteSeleccionado.Nombres"?
-    </BodyTemplate>
-
-    <FooterTemplate>
-        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick"> No </Button>
-        <Button Color="ButtonColor.Danger" @onclick="Eliminar"> Si </Button>
-    </FooterTemplate>
-
-</Modal>
+                    <p>¿Esta seguro que desea eliminar este estudiante?</p>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" @onclick="Eliminar">Confirmar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
-    private List<Estudiantes> estudiantes = new();
-    private Estudiantes estudianteSeleccionado = new();
-    private Modal modal;
+    private IQueryable<Estudiantes> itemsQueryable;
+    private Estudiantes estudiante = new();
 
     private string Filtro { get; set; } = string.Empty;
     private string ValorFiltro { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        estudiantes = await estudiantesService.GetList(e => true);
-    }
-
-    private async Task MostrarModal(Estudiantes estudiante)
-    {
-        estudianteSeleccionado = estudiante;
-        await modal.ShowAsync();
-    }
-
-
-    private async Task OnHideModalClick()
-    {
-        await modal.HideAsync();
+        var items = await estudiantesService.GetList(e => true);
+        itemsQueryable = items.AsQueryable();
     }
 
     private async Task Eliminar()
     {
-        bool eliminado = await estudiantesService.Eliminar(estudianteSeleccionado.EstudianteId);
+        bool eliminado = await estudiantesService.Eliminar(estudiante.EstudianteId);
 
         if (eliminado)
         {
-            estudiantes = await estudiantesService.GetList(e => true);
+            var items = await estudiantesService.GetList(e => true);
+            itemsQueryable = items.AsQueryable();
             toastService.ShowSuccess("Estudiante eliminado correctamente.");
-            await modal.HideAsync();
         }
         else
         {
@@ -130,22 +127,23 @@
     {
         if (ValorFiltro == "")
         {
-            estudiantes = await estudiantesService.GetList(e => true);
+            var items = await estudiantesService.GetList(e => true);
+            itemsQueryable = items.AsQueryable();
         }
         else if (ValorFiltro.Trim() != "" && Filtro == "Id")
         {
-            estudiantes = await estudiantesService.GetList(e =>
-                e.EstudianteId.ToString().Contains(ValorFiltro));
+            var Id = await estudiantesService.GetList(e => e.EstudianteId.ToString().Contains(ValorFiltro));
+            itemsQueryable = Id.AsQueryable(); 
         }
         else if (ValorFiltro.Trim() != "" && Filtro == "Nombre")
         {
-            estudiantes = await estudiantesService.GetList(e =>
-                e.Nombres.ToLower().Contains(ValorFiltro.ToLower()));
+            var Nombres = await estudiantesService.GetList(e => e.Nombres.ToLower().Contains(ValorFiltro.ToLower()));
+            itemsQueryable = Nombres.AsQueryable(); 
         }
         else if (ValorFiltro.Trim() != "" && Filtro == "Email")
         {
-            estudiantes = await estudiantesService.GetList(e =>
-                e.Email.ToLower().Contains(ValorFiltro.ToLower()));
+            var Email = await estudiantesService.GetList(e => e.Email.ToLower().Contains(ValorFiltro.ToLower()));
+            itemsQueryable = Email.AsQueryable();
         }
 
     }
