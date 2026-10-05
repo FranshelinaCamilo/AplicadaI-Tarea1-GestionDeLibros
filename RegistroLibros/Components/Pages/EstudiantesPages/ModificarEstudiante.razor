@@ -46,38 +46,41 @@
                 <div class="card-footer text-center mt-2">
                     <a href="/Estudiantes/Index" class="btn btn-secondary mt-2"> <span class="bi bi-arrow-left"></span> Volver</a>
                     <button type="submit" class="btn btn-primary bi bi-floppy mt-2"> Guardar</button>
-                    <button type="button" class="btn btn-danger bi bi-trash mt-2" @onclick="MostrarModal"> Eliminar</button>
+                    <button type="button" class="btn btn-danger bi bi-trash mt-2" data-bs-toggle ="modal" data-bs-target="#modalEliminar"> Eliminar</button>
                 </div>
             </div>
         </div>
     </div>
 </EditForm>
 
-@* Modal de confirmación *@
-<Modal @ref="modal" Title="Confirmar Eliminación">
+@*Modal eliminacion*@
+<div class="modal" id="modalEliminar" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"> Confirmar Eliminaci&oacute;n</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                @if (Estudiante != null)
+                {
 
-    <BodyTemplate>
-        ¿Está seguro de que desea eliminar al estudiante "@Estudiante.Nombres"?
-    </BodyTemplate>
-
-    <FooterTemplate>
-
-        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick"> No </Button>
-
-        <Button Color="ButtonColor.Danger" @onclick="Eliminar"> Si </Button>
-
-    </FooterTemplate>
-
-</Modal>
+                    <p>¿Esta seguro que desea eliminar este estudiante?</p>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" @onclick="Eliminar">Confirmar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
 
     [Parameter]
     public int EstudianteId { get; set; }
-
     private Estudiantes Estudiante = new Estudiantes();
-
-    private Modal modal;
 
     protected override async Task OnInitializedAsync()
     {
@@ -105,17 +108,6 @@
         }
     }
 
-    private async Task MostrarModal()
-    {
-        await modal.ShowAsync();
-    }
-
-
-    private async Task OnHideModalClick()
-    {
-        await modal.HideAsync();
-    }
-
    private async Task Eliminar()
    {
         bool Eliminado = await estudiantesService.Eliminar(Estudiante.EstudianteId);
@@ -123,7 +115,6 @@
         if (Eliminado)
         {
             toastService.ShowSuccess("Estudiante eliminado correctamente.");
-            await modal.HideAsync();
             navigationManager.NavigateTo("/Estudiantes/Index");
         }
         else
