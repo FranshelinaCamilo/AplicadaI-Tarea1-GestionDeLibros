@@ -6,7 +6,6 @@
 <EditForm Model="Libro" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
 
-
     <div class="container">
         <div class="card shadow-lg">
             <div class="card-header text-center">
@@ -14,7 +13,6 @@
             </div>
 
             <div class="card-body ">
-
                 @*LibroId*@
                 <div class="mb-3">
                     <label class="form-label"><strong>Id</strong></label>
@@ -41,7 +39,6 @@
                     <InputNumber class="form-control" @bind-Value="Libro.AnioPublicacion"></InputNumber>
                     <ValidationMessage For="(() => Libro.AnioPublicacion)" />
                 </div>
-
             </div>
 
             @*footer*@

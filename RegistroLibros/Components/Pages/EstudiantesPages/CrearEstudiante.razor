@@ -6,7 +6,6 @@
 <EditForm Model="Estudiante" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
 
-
     <div class="container">
         <div class="card shadow-lg">
             <div class="card-header text-center">
@@ -14,7 +13,6 @@
             </div>
 
             <div class="card-body ">
-
                 @*EstudianteId*@
                 <div class="mb-3">
                     <label class="form-label"><strong>Id</strong></label>
@@ -48,7 +46,6 @@
                     <InputDate class="form-control" @bind-Value="Estudiante.FechaNacimiento"></InputDate>
                     <ValidationMessage For="(() => Estudiante.FechaNacimiento)" />
                 </div>
-
             </div>
 
             @*footer*@
