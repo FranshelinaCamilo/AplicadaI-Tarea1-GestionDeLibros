@@ -19,6 +19,13 @@
                     <InputNumber class="form-control" @bind-Value="Prestamo.PrestamoId" readonly></InputNumber>
                 </div>
 
+                @*Fecha*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fecha</strong></label>
+                    <InputDate class="form-control" @bind-Value="Prestamo.Fecha"></InputDate>
+                    <ValidationMessage For="(() => Prestamo.Fecha)" />
+                </div>
+
                 @*EstudianteId*@
                 <div class="mb-3">
                     <label class="form-label"><strong>Estudiante</strong></label>

@@ -112,6 +112,9 @@ namespace RegistroLibros.Migrations
                     b.Property<int>("EstudianteId")
                         .HasColumnType("int");
 
+                    b.Property<DateOnly>("Fecha")
+                        .HasColumnType("date");
+
                     b.Property<int>("LibroId")
                         .HasColumnType("int");
 

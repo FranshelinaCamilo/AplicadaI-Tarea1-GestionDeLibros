@@ -60,6 +60,7 @@
 
         <div class="card-footer d-flex justify-content-between align-center mb-4">
             <label><strong>Cantidad: </strong> @itemsQueryable?.Count()</label>
+            <label><strong>Promedio de d&iacute;as: </strong>@PromedioDias().ToString("0.0") d&iacute;as</label>
         </div>
     </div>
 </div>
@@ -115,6 +116,26 @@
             var Libro = await devolucionesService.GetList(d => d.Prestamo.Libro.Titulo.ToLower().Contains(ValorFiltro.ToLower()));
             itemsQueryable = Libro.AsQueryable();
         }
+    }
 
+    private double PromedioDias()
+    {
+        if (itemsQueryable == null)
+        {
+            return 0;
+        }
+
+        var devoluciones = itemsQueryable
+            .Where(d => d.Prestamo != null)
+            .ToList();
+
+        if (devoluciones.Count == 0)
+        {
+            return 0;
+        }
+
+        return itemsQueryable
+            .Where(d => d.Prestamo != null)
+            .Average(d => (d.Fecha.ToDateTime(TimeOnly.MinValue) - d.Prestamo.Fecha.ToDateTime(TimeOnly.MinValue)).TotalDays);
     }
 }
