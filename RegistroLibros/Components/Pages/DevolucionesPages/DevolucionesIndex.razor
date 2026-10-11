@@ -85,7 +85,7 @@
         {
             var items = await devolucionesService.GetList(d => true);
             itemsQueryable = items.AsQueryable();
-            toastService.ShowSuccess("Devolucion eliminado correctamente.");
+            toastService.ShowSuccess("Devolucion eliminada correctamente.");
         }
         else
         {

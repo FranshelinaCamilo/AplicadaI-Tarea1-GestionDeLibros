@@ -1,5 +1,77 @@
-﻿<h3>DevolucionesCreate</h3>
+﻿@page "/Devoluciones/Crear"
+@rendermode InteractiveServer
+@inject DevolucionesService devolucionesService
+@inject PrestamosService prestamosService
+
+@*HTML*@
+<PageTitle>Crear Devolucion</PageTitle>
+<EditForm Model="Devolucion" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header text-center">
+                <h5 class="card-title mt-2">Crear Devoluci&oacute;n</h5>
+            </div>
+
+            <div class="card-body ">
+                @*Devolucion*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Id</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Devolucion.DevolucionId" readonly></InputNumber>
+                </div>
+
+                @*Fecha*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Fecha</strong></label>
+                    <InputDate class="form-control" @bind-Value="Devolucion.Fecha"></InputDate>
+                    <ValidationMessage For="(() => Devolucion.Fecha)" />
+                </div>
+
+                @*Prestamo*@
+                <div class="mb-3">
+                    <label class="form-label"><strong>Pr&eacute;stamo</strong></label>
+                    <InputSelect class="form-control form-select" @bind-Value="Devolucion.PrestamoId">
+                        <option value="" selected disabled>  Elija una opci&oacute;n  </option>
+                        @foreach (var Prestamo in prestamos)
+                        {
+                            <option value="@Prestamo.PrestamoId">Estudiante: @Prestamo.Estudiante.Nombres - Libro: @Prestamo.Libro.Titulo</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="(() => Devolucion.PrestamoId)" />
+                </div>
+            </div>
+
+            @*footer*@
+            <div class="card-footer text-center mt-2">
+                <a href="/Devoluciones/Index" class="btn btn-secondary"> <span class="bi bi-arrow-left"></span> Volver</a>
+                <button type="submit" class="btn btn-primary bi bi-floppy"> Guardar</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
 
 @code {
+    public Devoluciones Devolucion { get; set; } = new Devoluciones();
+    public List<Prestamos> prestamos { get; set; } = new List<Prestamos>();
 
+    protected override async Task OnInitializedAsync()
+    {
+        prestamos = await prestamosService.GetList(p => true);
+    }
+
+    public async Task Guardar()
+    {
+        var creado = await devolucionesService.Guardar(Devolucion);
+
+        if (creado)
+        {
+            toastService.ShowSuccess("Devolucion Guardada Correctamente");
+            navigationManager.NavigateTo("/Devoluciones/Index");
+        }
+        else
+        {
+            toastService.ShowError("No se pudo guardar correctamente");
+        }
+    }
 }

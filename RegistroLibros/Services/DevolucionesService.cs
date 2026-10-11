@@ -30,6 +30,15 @@ public class DevolucionesService(IDbContextFactory<Contexto> contextFactory) : I
     private async Task<bool> Insertar(Devoluciones devolucion)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
+
+        if(devolucion.Prestamo == null)
+        {
+            return false;
+        }
+
+        devolucion.Prestamo.Libro.Disponible = true;
+        contexto.Libros.Update(devolucion.Prestamo.Libro);
+
         contexto.Devoluciones.Add(devolucion);
         return await contexto.SaveChangesAsync() > 0;
     }
@@ -60,6 +69,20 @@ public class DevolucionesService(IDbContextFactory<Contexto> contextFactory) : I
     public async Task<bool> Eliminar(int DevolucionId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
+
+        var devolucion = await contexto.Devoluciones.FirstOrDefaultAsync(d => d.DevolucionId == DevolucionId);
+
+        if(devolucion == null)
+        {
+            return false;
+        }
+        else
+        {
+            devolucion.Prestamo.Libro.Disponible = false;
+            contexto.Libros.Update(devolucion.Prestamo.Libro);
+            await contexto.SaveChangesAsync();
+        }
+
         return await contexto.Devoluciones
             .Where(d => d.DevolucionId == DevolucionId)
             .ExecuteDeleteAsync() > 0;
