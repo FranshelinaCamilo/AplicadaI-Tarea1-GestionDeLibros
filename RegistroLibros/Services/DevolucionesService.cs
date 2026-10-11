@@ -31,15 +31,19 @@ public class DevolucionesService(IDbContextFactory<Contexto> contextFactory) : I
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
 
-        if(devolucion.Prestamo == null)
+        var prestamo = await contexto.Prestamos
+            .Include(p => p.Libro)
+            .FirstOrDefaultAsync(p => p.PrestamoId == devolucion.PrestamoId);
+
+        if (prestamo == null || prestamo.Libro == null)
         {
             return false;
         }
 
-        devolucion.Prestamo.Libro.Disponible = true;
-        contexto.Libros.Update(devolucion.Prestamo.Libro);
+        prestamo.Libro.Disponible = true;
 
         contexto.Devoluciones.Add(devolucion);
+
         return await contexto.SaveChangesAsync() > 0;
     }
 
