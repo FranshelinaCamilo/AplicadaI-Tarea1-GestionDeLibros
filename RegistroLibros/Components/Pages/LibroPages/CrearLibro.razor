@@ -57,16 +57,16 @@
 
     public async Task Guardar()
     {
-        var creado = await librosService.Guardar(Libro);
+        var crearResult = await librosService.Guardar(Libro);
 
-        if (creado)
+        crearResult.OnSuccess(() =>
         {
             toastService.ShowSuccess("Libro Guardado Correctamente");
             navigationManager.NavigateTo("/Libros/Index");
-        }
-        else
+        });
+        crearResult.OnFailure(() =>
         {
             toastService.ShowError("No se pudo guardar correctamente");
-        }
+        });
     }
 }
