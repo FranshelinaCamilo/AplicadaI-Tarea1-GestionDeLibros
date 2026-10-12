@@ -52,7 +52,46 @@ public class DevolucionesService(IDbContextFactory<Contexto> contextFactory) : I
     private async Task<bool> Modificar(Devoluciones devolucion)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
-        contexto.Update(devolucion);
+
+        var devolucionAnterior = await contexto.Devoluciones
+            .FirstOrDefaultAsync(d => d.DevolucionId == devolucion.DevolucionId);
+
+        if (devolucionAnterior == null)
+        {
+            return false;
+        }
+
+        if (devolucionAnterior.PrestamoId != devolucion.PrestamoId)
+        {
+            var prestamoNuevo = await contexto.Prestamos
+                .Include(p => p.Libro)
+                .FirstOrDefaultAsync(p => p.PrestamoId == devolucion.PrestamoId);
+
+            if (prestamoNuevo == null || prestamoNuevo.Libro == null)
+            {
+                return false;
+            }
+
+            bool yaDevuelto = await contexto.Devoluciones
+                .AnyAsync(d => d.PrestamoId == devolucion.PrestamoId);
+
+            if (yaDevuelto)
+            {
+                return false;
+            }
+
+            var prestamoAnterior = await contexto.Prestamos
+                .Include(p => p.Libro)
+                .FirstOrDefaultAsync(
+                    p => p.PrestamoId == devolucionAnterior.PrestamoId);
+
+            if (prestamoAnterior?.Libro != null)
+            {
+                prestamoAnterior.Libro.Disponible = false;
+            }
+            prestamoNuevo.Libro.Disponible = true;
+        }
+        devolucionAnterior.PrestamoId = devolucion.PrestamoId;
         return await contexto.SaveChangesAsync() > 0;
     }
 
@@ -82,7 +121,7 @@ public class DevolucionesService(IDbContextFactory<Contexto> contextFactory) : I
 
         var devolucion = await contexto.Devoluciones.FirstOrDefaultAsync(d => d.DevolucionId == DevolucionId);
 
-        if(devolucion == null)
+        if (devolucion == null)
         {
             return Result.Failure(new Error("Devolucion vacia", "La devolucion debe contener valores"));
         }

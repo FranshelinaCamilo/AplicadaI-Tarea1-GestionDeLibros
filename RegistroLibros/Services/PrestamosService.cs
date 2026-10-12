@@ -50,7 +50,39 @@ public class PrestamosService(IDbContextFactory<Contexto> contextFactory) : ISer
     private async Task<bool> Modificar(Prestamos prestamo)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
-        contexto.Update(prestamo);
+
+        var prestamoAnterior = await contexto.Prestamos
+            .FirstOrDefaultAsync(p => p.PrestamoId == prestamo.PrestamoId);
+
+        if (prestamoAnterior == null)
+        {
+            return false;
+        }
+
+        if (prestamoAnterior.LibroId != prestamo.LibroId)
+        {
+            var libroNuevo = await contexto.Libros
+                .FirstOrDefaultAsync(l => l.LibroId == prestamo.LibroId);
+
+            if (libroNuevo == null || !libroNuevo.Disponible)
+            {
+                return false;
+            }
+
+            var libroAnterior = await contexto.Libros
+                .FirstOrDefaultAsync(l => l.LibroId == prestamoAnterior.LibroId);
+
+            if (libroAnterior != null)
+            {
+                libroAnterior.Disponible = true;
+            }
+
+            libroNuevo.Disponible = false;
+        }
+
+        prestamoAnterior.EstudianteId = prestamo.EstudianteId;
+        prestamoAnterior.LibroId = prestamo.LibroId;
+
         return await contexto.SaveChangesAsync() > 0;
     }
 
