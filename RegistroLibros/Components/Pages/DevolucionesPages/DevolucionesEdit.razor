@@ -45,7 +45,7 @@
             <div class="card-footer text-center mt-2">
                 <a href="/Devoluciones/Index" class="btn btn-secondary mt-2"> <span class="bi bi-arrow-left"></span> Volver</a>
                 <button type="submit" class="btn btn-primary bi bi-floppy mt-2"> Guardar</button>
-                <button type="button" class="btn btn-danger bi bi-trash mt-2" data-bs-toggle="modal" data-bsp-target="#modalEliminar"> Eliminar</button>
+                <button type="button" class="btn btn-danger bi bi-trash mt-2" data-bs-toggle="modal" data-bs-target="#modalEliminar"> Eliminar</button>
             </div>
         </div>
     </div>
@@ -109,14 +109,14 @@
     private async Task Eliminar()
     {
 
-        var resultEliminado = await prestamosService.Eliminar(DevolucionId);
+        var resultEliminado = await devolucionesService.Eliminar(DevolucionId);
 
         resultEliminado.OnSuccess(() =>
         {
             toastService.ShowSuccess("Devolucion eliminada correctamente.");
             navigationManager.NavigateTo("/Devoluciones/Index");
         });
-        resultEliminado.OnSuccess(() =>
+        resultEliminado.OnFailure(() =>
         {
             toastService.ShowError("Error al eliminar la devolucion.");
         });
