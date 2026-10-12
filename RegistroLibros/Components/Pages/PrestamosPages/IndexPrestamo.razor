@@ -53,8 +53,6 @@
                     <PropertyColumn Property="@(p => p.Libro.Titulo)" title="T&iacute;tulo" Sortable="true" Align="Align.Left" />
                     <TemplateColumn Title="Opciones">
                         <a href="/Prestamos/Modificar/@context.EstudianteId" class="btn btn-outline-primary bi bi-pencil-square"></a>
-
-                        <button class="btn btn-outline-danger bi bi-trash" data-bs-toggle="modal" data-bs-target="#modalEliminar" @onclick="() => prestamo = context"></button>
                     </TemplateColumn>
                 </QuickGrid>
             </div>
@@ -67,30 +65,8 @@
     </div>
 </div>
 
-@*Modal eliminacion*@
-<div class="modal" id="modalEliminar" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"> Confirmar Eliminaci&oacute;n</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                @if (prestamo != null)
-                {
-
-                    <p>¿Esta seguro que desea eliminar este pr&eacute;stamo</p>
-                }
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" @onclick="Eliminar">Confirmar</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 @code {
+    private List<Prestamos> ListaPrestamos{ get; set; } = new List<Prestamos>();
     private IQueryable<Prestamos> itemsQueryable;
     private Prestamos prestamo = new();
 
@@ -99,43 +75,30 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var items = await prestamosService.GetList(p => true);
-        itemsQueryable = items.AsQueryable();
-    }
-
-    private async Task Eliminar()
-    {
-        bool eliminado = await prestamosService.Eliminar(prestamo.PrestamoId);
-
-        if (eliminado)
-        {
-            var items = await prestamosService.GetList(p => true);
-            itemsQueryable = items.AsQueryable();
-            toastService.ShowSuccess("Préstamo eliminado correctamente.");
-        }
-        else
-        {
-            toastService.ShowError("Error al eliminar el préstamo.");
-        }
+        var result = await prestamosService.GetList(p => true);
+        result.OnSuccess(p => ListaPrestamos = p);
+        itemsQueryable = ListaPrestamos.AsQueryable();
     }
 
     private async Task Buscar()
     {
         if (ValorFiltro == "")
         {
-            var items = await prestamosService.GetList(p => true);
-            itemsQueryable = items.AsQueryable();
+            var result = await prestamosService.GetList(p => true);
+            result.OnSuccess(p => ListaPrestamos = p);
         }
         else if (ValorFiltro.Trim() != "" && Filtro == "Estudiante")
         {
-            var estudiante = await prestamosService.GetList(p => p.Estudiante.Nombres.ToLower().Contains(ValorFiltro.ToLower()));
-            itemsQueryable = estudiante.AsQueryable();
+            var result = await prestamosService.GetList(p => p.Estudiante.Nombres.ToLower().Contains(ValorFiltro.ToLower()));
+            result.OnSuccess(p => ListaPrestamos = p);
         }
         else if (ValorFiltro.Trim() != "" && Filtro == "Titulo")
         {
-            var titulo = await prestamosService.GetList(p => p.Libro.Titulo.ToLower().Contains(ValorFiltro.ToLower()));
-            itemsQueryable = titulo.AsQueryable();
+            var result = await prestamosService.GetList(p => p.Libro.Titulo.ToLower().Contains(ValorFiltro.ToLower()));
+            result.OnSuccess(p => ListaPrestamos = p);
         }
+
+        itemsQueryable = ListaPrestamos.AsQueryable();
 
     }
 }

@@ -52,8 +52,6 @@
                     <PropertyColumn Property="@(e => e.AnioPublicacion)" title="Año de Publicación" Sortable="true" Align="Align.Left" />
                     <TemplateColumn Title="Opciones">
                         <a href="/Libro/Modificar/@context.LibroId" class="btn btn-outline-primary bi bi-pencil-square"></a>
-
-                        <button class="btn btn-outline-danger bi bi-trash" data-bs-toggle="modal" data-bs-target="#modalEliminar" @onclick="() => libro = context"></button>
                     </TemplateColumn>
                 </QuickGrid>
             </div>
@@ -65,30 +63,8 @@
     </div>
 </div>
 
-@*Modal eliminacion*@
-<div class="modal" id="modalEliminar" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"> Confirmar Eliminaci&oacute;n</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                @if (libro != null)
-                {
-
-                    <p>¿Esta seguro que desea eliminar este libro?</p>
-                }
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" @onclick="Eliminar">Confirmar</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 @code {
+    private List<Libros> ListaLibros { get; set; } = new List<Libros>();
     private IQueryable<Libros> itemsQueryable;
     private Libros libro = new();
 
@@ -97,51 +73,37 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var items = await librosService.GetList(l => true);
-        itemsQueryable = items.AsQueryable();
-    }
-
-    private async Task Eliminar()
-    {
-
-        bool eliminado = await librosService.Eliminar(libro.LibroId);
-
-        if (eliminado)
-        {
-            var items = await librosService.GetList(l => true);
-            itemsQueryable = items.AsQueryable();
-            toastService.ShowSuccess("Libro eliminado correctamente.");
-        }
-        else
-        {
-            toastService.ShowError("Error al eliminar el libro.");
-        }
+        var result = await librosService.GetList(l => true);
+        result.OnSuccess(l => ListaLibros = l);
+        itemsQueryable = ListaLibros.AsQueryable();
     }
 
     private async Task Buscar()
     {
         if (ValorFiltro == "")
         {
-            var items = await librosService.GetList(l => true);
-            itemsQueryable = items.AsQueryable();
+            var result = await librosService.GetList(l => true);
+            result.OnSuccess(l => ListaLibros = l);
         }
         else if (ValorFiltro.Trim() != "" && Filtro.Trim() == "Autor")
         {
-            var Autor = await librosService.GetList(l => l.Autor.ToLower().Contains(ValorFiltro.ToLower()));
-            itemsQueryable = Autor.AsQueryable();
+            var result = await librosService.GetList(l => l.Autor.ToLower().Contains(ValorFiltro.ToLower()));
+            result.OnSuccess(l => ListaLibros = l);
         }
         else if (Filtro.Trim() != "" && Filtro.Trim() == "Titulo")
         {
-            var Titulo = await librosService.GetList(l => l.Titulo.ToLower().Contains(ValorFiltro.ToLower()));
-            itemsQueryable = Titulo.AsQueryable();
+            var result = await librosService.GetList(l => l.Titulo.ToLower().Contains(ValorFiltro.ToLower()));
+            result.OnSuccess(l => ListaLibros = l);
         }
         else if (Filtro.Trim() != "" && Filtro.Trim() == "LibroId")
         {
             if (int.TryParse(ValorFiltro, out int id))
             {
-                var Id = await librosService.GetList(l => l.LibroId == id);
-                itemsQueryable = Id.AsQueryable();
+                var result = await librosService.GetList(l => l.LibroId == id);
+                result.OnSuccess(l => ListaLibros = l);
             }
         }
+
+        itemsQueryable = ListaLibros.AsQueryable();
     }
 }
