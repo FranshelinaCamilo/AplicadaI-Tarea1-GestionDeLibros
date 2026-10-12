@@ -6,20 +6,22 @@ using System.Linq.Expressions;
 
 namespace RegistroLibros.Services;
 
-public class LibrosService(IDbContextFactory<Contexto> contextFactory) : IService<Libros, int>
+public class LibrosService(IDbContextFactory<Contexto> contextFactory) : IServiceResult<Libros, int>
 {
-    public async Task<bool> Guardar(Libros libro)
+    public async Task<Result> Guardar(Libros libro)
     {
         if (!await Existe(libro.LibroId))
         {
             if (await ExisteTitulo(libro.Titulo))
-                return false;
+                return Result.Failure(new Error("Titulo Duplicado", "Ya existe un libro con ese título."));
 
-            return await Insertar(libro);
+            var inserto = await Insertar(libro);
+            return Result.Success(inserto);
         }
         else
         {
-            return await Modificar(libro);
+            var modifico = await Modificar(libro);
+            return Result.Success(modifico);
         }
     }
 
@@ -51,14 +53,14 @@ public class LibrosService(IDbContextFactory<Contexto> contextFactory) : IServic
         return await contexto.SaveChangesAsync() > 0;
     }
 
-    public async Task<Libros?> Buscar(int LibroId)
+    public async Task<Result<Libros?>> Buscar(int LibroId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Libros
             .FirstOrDefaultAsync(l => l.LibroId == LibroId);
     }
 
-    public async Task<List<Libros>> GetList(Expression<Func<Libros, bool>> criterio)
+    public async Task<Result<List<Libros>>> GetList(Expression<Func<Libros, bool>> criterio)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Libros
@@ -67,11 +69,12 @@ public class LibrosService(IDbContextFactory<Contexto> contextFactory) : IServic
             .ToListAsync();
     }
 
-    public async Task<bool> Eliminar(int LibroId)
+    public async Task<Result> Eliminar(int LibroId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
-        return await contexto.Libros
+        var eliminado = await contexto.Libros
             .Where(l => l.LibroId == LibroId)
             .ExecuteDeleteAsync() > 0;
+        return Result.Success(eliminado);
     }
 }

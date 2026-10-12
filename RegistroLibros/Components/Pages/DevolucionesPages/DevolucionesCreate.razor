@@ -32,7 +32,7 @@
                 <div class="mb-3">
                     <label class="form-label"><strong>Pr&eacute;stamo</strong></label>
                     <InputSelect class="form-control form-select" @bind-Value="Devolucion.PrestamoId">
-                        <option value="">  Elija una opci&oacute;n  </option>
+                        <option selected>  Elija una opci&oacute;n  </option>
                         @foreach (var Prestamo in prestamos)
                         {
                             <option value="@Prestamo.PrestamoId">Estudiante: @Prestamo.Estudiante.Nombres - Libro: @Prestamo.Libro.Titulo</option>
@@ -57,7 +57,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        prestamos = await prestamosService.GetList(p => true);
+        prestamos = await prestamosService.GetList(p => true && p.Libro.Disponible == false);
     }
 
     public async Task Guardar()

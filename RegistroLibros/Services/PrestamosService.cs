@@ -6,17 +6,19 @@ using System.Linq.Expressions;
 
 namespace RegistroLibros.Services;
 
-public class PrestamosService(IDbContextFactory<Contexto> contextFactory) : IService<Prestamos, int>
+public class PrestamosService(IDbContextFactory<Contexto> contextFactory) : IServiceResult<Prestamos, int>
 {
-    public async Task<bool> Guardar(Prestamos prestamo)
+    public async Task<Result> Guardar(Prestamos prestamo)
     {
         if (!await Existe(prestamo.PrestamoId))
         {
-            return await Insertar(prestamo);
+            var inserto = await Insertar(prestamo);
+            return Result.Success(inserto);
         }
         else
         {
-            return await Modificar(prestamo);
+            var modifico = await Modificar(prestamo);
+            return Result.Success(modifico);
         }
     }
 
@@ -52,7 +54,7 @@ public class PrestamosService(IDbContextFactory<Contexto> contextFactory) : ISer
         return await contexto.SaveChangesAsync() > 0;
     }
 
-    public async Task<Prestamos?> Buscar(int PrestamoId)
+    public async Task<Result<Prestamos?>> Buscar(int PrestamoId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Prestamos
@@ -61,7 +63,7 @@ public class PrestamosService(IDbContextFactory<Contexto> contextFactory) : ISer
             .FirstOrDefaultAsync(p => p.PrestamoId == PrestamoId);
     }
 
-    public async Task<List<Prestamos>> GetList(Expression<Func<Prestamos, bool>> criterio)
+    public async Task<Result<List<Prestamos>>> GetList(Expression<Func<Prestamos, bool>> criterio)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Prestamos
@@ -72,7 +74,7 @@ public class PrestamosService(IDbContextFactory<Contexto> contextFactory) : ISer
             .ToListAsync();
     }
 
-    public async Task<bool> Eliminar(int PrestamoId)
+    public async Task<Result> Eliminar(int PrestamoId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
 
@@ -80,7 +82,7 @@ public class PrestamosService(IDbContextFactory<Contexto> contextFactory) : ISer
 
         if (prestamo == null)
         {
-            return false;
+            return Result.Failure(new Error("Prestamo vacio", "El prestamo debe contener valores"));
         }
 
         if (prestamo != null)
@@ -95,8 +97,9 @@ public class PrestamosService(IDbContextFactory<Contexto> contextFactory) : ISer
             }
         }
 
-        return await contexto.Prestamos
+        var eliminado = await contexto.Prestamos
             .Where(p => p.PrestamoId == PrestamoId)
             .ExecuteDeleteAsync() > 0;
+        return Result.Success(eliminado);
     }
 }
