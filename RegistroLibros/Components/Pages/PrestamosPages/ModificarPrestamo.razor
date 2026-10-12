@@ -91,45 +91,48 @@
     public int PrestamoId { get; set; }
     private Prestamos Prestamo { get; set; } = new Prestamos();
 
-    public List<Estudiantes> estudiantes { get; set; } = new List<Estudiantes>();
-    public List<Libros> libros { get; set; } = new List<Libros>();
+    private List<Estudiantes> estudiantes { get; set; } = new List<Estudiantes>();
+    private List<Libros> libros { get; set; } = new List<Libros>();
+
 
     protected override async Task OnInitializedAsync()
     {
-        Prestamo = await prestamosService.Buscar(PrestamoId);
-        estudiantes = await estudiantesService.GetList(e => e.EstudianteId > 0);
-        libros = await librosService.GetList(l => l.LibroId > 0);
+        var resultPrestamo = await prestamosService.Buscar(PrestamoId);
+        var resultEstudiantes = await estudiantesService.GetList(e => e.EstudianteId > 0);
+        var resultLibros = await librosService.GetList(l => l.LibroId > 0);
+
+        resultPrestamo.OnSuccess(p => Prestamo = p);
+        resultEstudiantes.OnSuccess(e => estudiantes = e);
+        resultLibros.OnSuccess(l => libros = l);
     }
 
     private async Task Modificar()
     {
-        bool modificado = await prestamosService.Guardar(Prestamo);
+        var resultModificado = await prestamosService.Guardar(Prestamo);
 
-        if (modificado)
+        resultModificado.OnSuccess(() =>
         {
             toastService.ShowSuccess("Prestamo modificado correctamente.");
             navigationManager.NavigateTo("/Prestamos/Index");
-        }
-        else
+        });
+        resultModificado.OnFailure(() =>
         {
             toastService.ShowError("Error al modificar el prestamo.");
-
-        }
+        });
     }
 
     private async Task Eliminar()
     {
+        var resultEliminado = await prestamosService.Eliminar(PrestamoId);
 
-        bool Eliminado = await prestamosService.Eliminar(PrestamoId);
-
-        if (Eliminado)
+        resultEliminado.OnSuccess(() =>
         {
             toastService.ShowSuccess("Prestamo eliminado correctamente.");
             navigationManager.NavigateTo("/Prestamos/Index");
-        }
-        else
+        });
+        resultEliminado.OnFailure(() =>
         {
             toastService.ShowError("Error al eliminar el prestamo.");
-        }
+        });
     }
 }

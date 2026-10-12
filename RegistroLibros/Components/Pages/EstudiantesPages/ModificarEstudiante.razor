@@ -84,42 +84,37 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var estudianteEncontrado = await estudiantesService.Buscar(EstudianteId);
-
-        if (estudianteEncontrado != null)
-        {
-            Estudiante = estudianteEncontrado;
-        }
+        var result = await estudiantesService.Buscar(EstudianteId);
+        result.OnSuccess(e => Estudiante = e);
     }
 
     private async Task Modificar()
     {
-        bool Modificado = await estudiantesService.Guardar(Estudiante);
+        var resultModificado = await estudiantesService.Guardar(Estudiante);
 
-        if (Modificado)
+        resultModificado.OnSuccess(() =>
         {
-            toastService.ShowSuccess("Estudiante modificado correctamente."); 
+            toastService.ShowSuccess("Estudiante modificado correctamente.");
             navigationManager.NavigateTo("/Estudiantes/Index");
-        }
-        else
+        });
+        resultModificado.OnFailure(() =>
         {
             toastService.ShowError("Error al modificar el estudiante.");
-        
-        }
+        });
     }
 
-   private async Task Eliminar()
-   {
-        bool Eliminado = await estudiantesService.Eliminar(Estudiante.EstudianteId);
+    private async Task Eliminar()
+    {
+        var resultEliminado = await estudiantesService.Eliminar(Estudiante.EstudianteId);
 
-        if (Eliminado)
+        resultEliminado.OnSuccess(() =>
         {
             toastService.ShowSuccess("Estudiante eliminado correctamente.");
             navigationManager.NavigateTo("/Estudiantes/Index");
-        }
-        else
+        });
+        resultEliminado.OnFailure(() =>
         {
             toastService.ShowError("Error al eliminar el estudiante.");
-        }
+        });
     }
 }

@@ -84,39 +84,41 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Devolucion = await devolucionesService.Buscar(DevolucionId);
-        prestamos = await prestamosService.GetList(p => true);
+        var resultDevolucion = await devolucionesService.Buscar(DevolucionId);
+        var resultPrestamos = await prestamosService.GetList(p => true);
+
+        resultDevolucion.OnSuccess(d => Devolucion = d);
+        resultPrestamos.OnSuccess(p => prestamos = p);
     }
 
     private async Task Modificar()
     {
-        bool modificado = await devolucionesService.Guardar(Devolucion);
+        var resultModificado = await devolucionesService.Guardar(Devolucion);
 
-        if (modificado)
+        resultModificado.OnSuccess(() =>
         {
             toastService.ShowSuccess("Devolucion modificada correctamente.");
             navigationManager.NavigateTo("/Devoluciones/Index");
-        }
-        else
+        });
+        resultModificado.OnSuccess(() =>
         {
             toastService.ShowError("Error al modificar la Devolucion.");
-
-        }
+        });
     }
 
     private async Task Eliminar()
     {
 
-        bool Eliminado = await prestamosService.Eliminar(DevolucionId);
+        var resultEliminado = await prestamosService.Eliminar(DevolucionId);
 
-        if (Eliminado)
+        resultEliminado.OnSuccess(() =>
         {
             toastService.ShowSuccess("Devolucion eliminada correctamente.");
             navigationManager.NavigateTo("/Devoluciones/Index");
-        }
-        else
+        });
+        resultEliminado.OnSuccess(() =>
         {
             toastService.ShowError("Error al eliminar la devolucion.");
-        }
+        });
     }
 }
