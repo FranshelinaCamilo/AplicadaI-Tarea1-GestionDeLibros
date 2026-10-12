@@ -46,6 +46,7 @@
             <div class="grid mt-3">
                 <QuickGrid Items="@itemsQueryable">
                     <PropertyColumn Property="@(p => p.PrestamoId)" title="Id Pr&eacute;stamo" Sortable="true" />
+                    <PropertyColumn Property="@(p => p.Fecha)" title="Fecha" Sortable="true" Align="Align.Left" />
                     <PropertyColumn Property="@(p => p.EstudianteId)" title="Id Estudiante" Sortable="true" Align="Align.Left" />
                     <PropertyColumn Property="@(p => p.Estudiante.Nombres)" title="Nombre" Sortable="true" Align="Align.Left" />
                     <PropertyColumn Property="@(p => p.LibroId)" title="Id Libro" Sortable="true" Align="Align.Left" />
