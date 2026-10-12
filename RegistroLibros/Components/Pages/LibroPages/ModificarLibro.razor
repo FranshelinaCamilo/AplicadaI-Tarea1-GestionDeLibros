@@ -63,7 +63,7 @@
                 }
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" @onclick="Eliminar">Confirmar</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @onclick=" Eliminar">Confirmar</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
@@ -78,43 +78,38 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var libroEncontrado = await librosService.Buscar(LibroId);
-
-        if (libroEncontrado != null)
-        {
-            Libro = libroEncontrado;
-        }
+        var result = await librosService.Buscar(LibroId);
+        result.OnSuccess(l => Libro = l);
     }
 
     private async Task Modificar()
     {
-        bool modificado = await librosService.Guardar(Libro);
+        var resultModificado = await librosService.Guardar(Libro);
 
-        if (modificado)
+        resultModificado.OnSuccess(() =>
         {
             toastService.ShowSuccess("Libro modificado correctamente.");
             navigationManager.NavigateTo("/Libros/Index");
-        }
-        else
+        });
+        resultModificado.OnFailure(() =>
         {
             toastService.ShowError("Error al modificar el libro.");
-        
-        }
+
+        });
     }
 
-   private async Task Eliminar()
+    private async Task Eliminar()
     {
+        var resultEliminado = await librosService.Eliminar(Libro.LibroId);
 
-        bool Eliminado = await librosService.Eliminar(Libro.LibroId);
-
-        if (Eliminado)
+        resultEliminado.OnSuccess(() =>
         {
             toastService.ShowSuccess("Libro eliminado correctamente.");
             navigationManager.NavigateTo("/Libros/Index");
-        }
-        else
+        });
+        resultEliminado.OnFailure(() =>
         {
             toastService.ShowError("Error al eliminar el libro.");
-        }
+        });
     }
 }

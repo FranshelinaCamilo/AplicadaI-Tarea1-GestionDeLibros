@@ -45,7 +45,7 @@
             <div class="card-footer text-center mt-2">
                 <a href="/Devoluciones/Index" class="btn btn-secondary mt-2"> <span class="bi bi-arrow-left"></span> Volver</a>
                 <button type="submit" class="btn btn-primary bi bi-floppy mt-2"> Guardar</button>
-                <button type="button" class="btn btn-danger bi bi-trash mt-2" data-bs-toggle="modal" data-bsp-target="#modalEliminar"> Eliminar</button>
+                <button type="button" class="btn btn-danger bi bi-trash mt-2" data-bs-toggle="modal" data-bs-target="#modalEliminar"> Eliminar</button>
             </div>
         </div>
     </div>
@@ -67,7 +67,7 @@
                 }
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" @onclick="Eliminar">Confirmar</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @onclick="Eliminar">Confirmar</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
@@ -84,39 +84,41 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Devolucion = await devolucionesService.Buscar(DevolucionId);
-        prestamos = await prestamosService.GetList(p => true);
+        var resultDevolucion = await devolucionesService.Buscar(DevolucionId);
+        var resultPrestamos = await prestamosService.GetList(p => true);
+
+        resultDevolucion.OnSuccess(d => Devolucion = d);
+        resultPrestamos.OnSuccess(p => prestamos = p);
     }
 
     private async Task Modificar()
     {
-        bool modificado = await devolucionesService.Guardar(Devolucion);
+        var resultModificado = await devolucionesService.Guardar(Devolucion);
 
-        if (modificado)
+        resultModificado.OnSuccess(() =>
         {
             toastService.ShowSuccess("Devolucion modificada correctamente.");
             navigationManager.NavigateTo("/Devoluciones/Index");
-        }
-        else
+        });
+        resultModificado.OnSuccess(() =>
         {
             toastService.ShowError("Error al modificar la Devolucion.");
-
-        }
+        });
     }
 
     private async Task Eliminar()
     {
 
-        bool Eliminado = await prestamosService.Eliminar(DevolucionId);
+        var resultEliminado = await devolucionesService.Eliminar(DevolucionId);
 
-        if (Eliminado)
+        resultEliminado.OnSuccess(() =>
         {
             toastService.ShowSuccess("Devolucion eliminada correctamente.");
             navigationManager.NavigateTo("/Devoluciones/Index");
-        }
-        else
+        });
+        resultEliminado.OnFailure(() =>
         {
             toastService.ShowError("Error al eliminar la devolucion.");
-        }
+        });
     }
 }

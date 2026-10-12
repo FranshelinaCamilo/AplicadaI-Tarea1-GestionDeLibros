@@ -66,6 +66,7 @@
 </div>
 
 @code {
+    private List<Devoluciones> ListaDevoluciones { get; set; } = new List<Devoluciones>(); 
     private IQueryable<Devoluciones> itemsQueryable;
     private Devoluciones devolucion = new();
 
@@ -74,48 +75,34 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var items = await devolucionesService.GetList(d => true);
-        itemsQueryable = items.AsQueryable();
-    }
-
-    private async Task Eliminar()
-    {
-        bool eliminado = await estudiantesService.Eliminar(devolucion.DevolucionId);
-
-        if (eliminado)
-        {
-            var items = await devolucionesService.GetList(d => true);
-            itemsQueryable = items.AsQueryable();
-            toastService.ShowSuccess("Devolucion eliminada correctamente.");
-        }
-        else
-        {
-            toastService.ShowError("Error al eliminar la devolucion.");
-        }
+        var result = await devolucionesService.GetList(d => true);
+        result.OnSuccess(d => ListaDevoluciones = d);
+        itemsQueryable = ListaDevoluciones.AsQueryable();
     }
 
     private async Task Buscar()
     {
         if (ValorFiltro == "")
         {
-            var items = await devolucionesService.GetList(d => true);
-            itemsQueryable = items.AsQueryable();
+            var result = await devolucionesService.GetList(d => true);
+            result.OnSuccess(d => ListaDevoluciones = d);
         }
         else if (ValorFiltro.Trim() != "" && Filtro == "Id")
         {
-            var Id = await devolucionesService.GetList(d => d.DevolucionId.ToString().Contains(ValorFiltro));
-            itemsQueryable = Id.AsQueryable();
+            var result = await devolucionesService.GetList(d => d.DevolucionId.ToString().Contains(ValorFiltro));
+            result.OnSuccess(d => ListaDevoluciones = d);
         }
         else if (ValorFiltro.Trim() != "" && Filtro == "Estudiante")
         {
-            var Estudiante = await devolucionesService.GetList(d => d.Prestamo.Estudiante.Nombres.ToLower().Contains(ValorFiltro.ToLower()));
-            itemsQueryable = Estudiante.AsQueryable();
+            var result = await devolucionesService.GetList(d => d.Prestamo.Estudiante.Nombres.ToLower().Contains(ValorFiltro.ToLower()));
+            result.OnSuccess(d => ListaDevoluciones = d);
         }
         else if (ValorFiltro.Trim() != "" && Filtro == "Libro")
         {
-            var Libro = await devolucionesService.GetList(d => d.Prestamo.Libro.Titulo.ToLower().Contains(ValorFiltro.ToLower()));
-            itemsQueryable = Libro.AsQueryable();
+            var result = await devolucionesService.GetList(d => d.Prestamo.Libro.Titulo.ToLower().Contains(ValorFiltro.ToLower()));
+            result.OnSuccess(d => ListaDevoluciones = d);
         }
+        itemsQueryable = ListaDevoluciones.AsQueryable();
     }
 
     private double PromedioDias()

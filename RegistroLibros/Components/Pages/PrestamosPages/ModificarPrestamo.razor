@@ -28,7 +28,7 @@
                 @*EstudianteId*@
                 <div class="mb-3">
                     <label class="form-label"><strong>Estudiante</strong></label>
-                    <InputSelect class="form-control form-select" @bind-Value="Prestamo.EstudianteId" readonly>
+                    <InputSelect class="form-control form-select" @bind-Value="Prestamo.EstudianteId">
                         <option>  Elija una opci&oacute;n  </option>
                         @foreach (var estudiante in estudiantes)
                         {
@@ -41,7 +41,7 @@
                 @*Libro*@
                 <div class="mb-3">
                     <label class="form-label"><strong>Libro</strong></label>
-                    <InputSelect class="form-control form-select" @bind-Value="Prestamo.LibroId" readonly>
+                    <InputSelect class="form-control form-select" @bind-Value="Prestamo.LibroId">
                         <option>  Elija una opci&oacute;n  </option>
                         @foreach (var libro in libros)
                         {
@@ -55,7 +55,7 @@
                 <div class="card-footer text-center mt-2">
                     <a href="/Prestamos/Index" class="btn btn-secondary mt-2"> <span class="bi bi-arrow-left"></span> Volver</a>
                     <button type="submit" class="btn btn-primary bi bi-floppy mt-2"> Guardar</button>
-                    <button type="button" class="btn btn-danger bi bi-trash mt-2" data-bs-toggle="modal" data-bsp-target="#modalEliminar"> Eliminar</button>
+                    <button type="button" class="btn btn-danger bi bi-trash mt-2" data-bs-toggle="modal" data-bs-target="#modalEliminar"> Eliminar</button>
                 </div>
             </div>
         </div>
@@ -78,7 +78,7 @@
                 }
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" @onclick="Eliminar">Confirmar</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @onclick="Eliminar">Confirmar</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
@@ -91,45 +91,48 @@
     public int PrestamoId { get; set; }
     private Prestamos Prestamo { get; set; } = new Prestamos();
 
-    public List<Estudiantes> estudiantes { get; set; } = new List<Estudiantes>();
-    public List<Libros> libros { get; set; } = new List<Libros>();
+    private List<Estudiantes> estudiantes { get; set; } = new List<Estudiantes>();
+    private List<Libros> libros { get; set; } = new List<Libros>();
+
 
     protected override async Task OnInitializedAsync()
     {
-        Prestamo = await prestamosService.Buscar(PrestamoId);
-        estudiantes = await estudiantesService.GetList(e => e.EstudianteId > 0);
-        libros = await librosService.GetList(l => l.LibroId > 0);
+        var resultPrestamo = await prestamosService.Buscar(PrestamoId);
+        var resultEstudiantes = await estudiantesService.GetList(e => true);
+        var resultLibros = await librosService.GetList(l => true);
+
+        resultPrestamo.OnSuccess(p => Prestamo = p);
+        resultEstudiantes.OnSuccess(e => estudiantes = e);
+        resultLibros.OnSuccess(l => libros = l);
     }
 
     private async Task Modificar()
     {
-        bool modificado = await prestamosService.Guardar(Prestamo);
+        var resultModificado = await prestamosService.Guardar(Prestamo);
 
-        if (modificado)
+        resultModificado.OnSuccess(() =>
         {
             toastService.ShowSuccess("Prestamo modificado correctamente.");
             navigationManager.NavigateTo("/Prestamos/Index");
-        }
-        else
+        });
+        resultModificado.OnFailure(() =>
         {
             toastService.ShowError("Error al modificar el prestamo.");
-
-        }
+        });
     }
 
     private async Task Eliminar()
     {
+        var resultEliminado = await prestamosService.Eliminar(PrestamoId);
 
-        bool Eliminado = await prestamosService.Eliminar(PrestamoId);
-
-        if (Eliminado)
+        resultEliminado.OnSuccess(() =>
         {
             toastService.ShowSuccess("Prestamo eliminado correctamente.");
             navigationManager.NavigateTo("/Prestamos/Index");
-        }
-        else
+        });
+        resultEliminado.OnFailure(() =>
         {
             toastService.ShowError("Error al eliminar el prestamo.");
-        }
+        });
     }
 }

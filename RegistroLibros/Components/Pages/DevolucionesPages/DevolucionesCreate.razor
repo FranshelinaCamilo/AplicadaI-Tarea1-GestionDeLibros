@@ -32,7 +32,7 @@
                 <div class="mb-3">
                     <label class="form-label"><strong>Pr&eacute;stamo</strong></label>
                     <InputSelect class="form-control form-select" @bind-Value="Devolucion.PrestamoId">
-                        <option value="">  Elija una opci&oacute;n  </option>
+                        <option selected>  Elija una opci&oacute;n  </option>
                         @foreach (var Prestamo in prestamos)
                         {
                             <option value="@Prestamo.PrestamoId">Estudiante: @Prestamo.Estudiante.Nombres - Libro: @Prestamo.Libro.Titulo</option>
@@ -57,21 +57,22 @@
 
     protected override async Task OnInitializedAsync()
     {
-        prestamos = await prestamosService.GetList(p => true);
+        var result = await prestamosService.GetList(p => true && p.Libro.Disponible == false);
+        result.OnSuccess(d => prestamos = d);
     }
 
     public async Task Guardar()
     {
-        var creado = await devolucionesService.Guardar(Devolucion);
+        var crearResult = await devolucionesService.Guardar(Devolucion);
 
-        if (creado)
+        crearResult.OnSuccess(() =>
         {
             toastService.ShowSuccess("Devolucion Guardada Correctamente");
             navigationManager.NavigateTo("/Devoluciones/Index");
-        }
-        else
+        });
+        crearResult.OnFailure(() =>
         {
             toastService.ShowError("No se pudo guardar correctamente");
-        }
+        });
     }
 }

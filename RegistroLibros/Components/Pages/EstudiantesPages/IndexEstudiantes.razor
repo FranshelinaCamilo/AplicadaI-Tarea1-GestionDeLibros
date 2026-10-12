@@ -53,8 +53,6 @@
                     <PropertyColumn Property="@(e => e.FechaNacimiento)" title="Fecha de Nacimiento" Sortable="true" Align="Align.Left" />
                     <TemplateColumn Title="Opciones">
                         <a href="/Estudiante/Modificar/@context.EstudianteId" class="btn btn-outline-primary bi bi-pencil-square"></a>
-
-                        <button class="btn btn-outline-danger bi bi-trash"data-bs-toggle ="modal" data-bs-target="#modalEliminar"></button>
                     </TemplateColumn>
                 </QuickGrid>
             </div>
@@ -66,30 +64,8 @@
     </div>
 </div>
 
-@*Modal eliminacion*@
-<div class="modal" id="modalEliminar" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"> Confirmar Eliminaci&oacute;n</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                @if (estudiante != null)
-                {
-
-                    <p>¿Esta seguro que desea eliminar este estudiante?</p>
-                }
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" @onclick="Eliminar">Confirmar</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 @code {
+    private List<Estudiantes> ListaEstudiantes { get; set; } = new List<Estudiantes>();
     private IQueryable<Estudiantes> itemsQueryable;
     private Estudiantes estudiante = new();
 
@@ -98,48 +74,33 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var items = await estudiantesService.GetList(e => true);
-        itemsQueryable = items.AsQueryable();
-    }
-
-    private async Task Eliminar()
-    {
-        bool eliminado = await estudiantesService.Eliminar(estudiante.EstudianteId);
-
-        if (eliminado)
-        {
-            var items = await estudiantesService.GetList(e => true);
-            itemsQueryable = items.AsQueryable();
-            toastService.ShowSuccess("Estudiante eliminado correctamente.");
-        }
-        else
-        {
-            toastService.ShowError("Error al eliminar el estudiante.");
-        }
+        var result = await estudiantesService.GetList(e => true);
+        result.OnSuccess(e => ListaEstudiantes = e);
+        itemsQueryable = ListaEstudiantes.AsQueryable();
     }
 
     private async Task Buscar()
     {
         if (ValorFiltro == "")
         {
-            var items = await estudiantesService.GetList(e => true);
-            itemsQueryable = items.AsQueryable();
+            var result = await estudiantesService.GetList(e => true);
+            result.OnSuccess(e => ListaEstudiantes = e);
         }
         else if (ValorFiltro.Trim() != "" && Filtro == "Id")
         {
-            var Id = await estudiantesService.GetList(e => e.EstudianteId.ToString().Contains(ValorFiltro));
-            itemsQueryable = Id.AsQueryable(); 
+            var result = await estudiantesService.GetList(e => e.EstudianteId.ToString().Contains(ValorFiltro));
+            result.OnSuccess(e => ListaEstudiantes = e);
         }
         else if (ValorFiltro.Trim() != "" && Filtro == "Nombre")
         {
-            var Nombres = await estudiantesService.GetList(e => e.Nombres.ToLower().Contains(ValorFiltro.ToLower()));
-            itemsQueryable = Nombres.AsQueryable(); 
+            var result = await estudiantesService.GetList(e => e.Nombres.ToLower().Contains(ValorFiltro.ToLower()));
+            result.OnSuccess(e => ListaEstudiantes = e);
         }
         else if (ValorFiltro.Trim() != "" && Filtro == "Email")
         {
-            var Email = await estudiantesService.GetList(e => e.Email.ToLower().Contains(ValorFiltro.ToLower()));
-            itemsQueryable = Email.AsQueryable();
+            var result = await estudiantesService.GetList(e => e.Email.ToLower().Contains(ValorFiltro.ToLower()));
+            result.OnSuccess(e => ListaEstudiantes = e);
         }
-
+        itemsQueryable = ListaEstudiantes.AsQueryable();
     }
 }

@@ -6,17 +6,19 @@ using System.Linq.Expressions;
 
 namespace RegistroLibros.Services;
 
-public class DevolucionesService(IDbContextFactory<Contexto> contextFactory) : IService<Devoluciones, int>
+public class DevolucionesService(IDbContextFactory<Contexto> contextFactory) : IServiceResult<Devoluciones, int>
 {
-    public async Task<bool> Guardar(Devoluciones devolucion)
+    public async Task<Result> Guardar(Devoluciones devolucion)
     {
         if (!await Existe(devolucion.DevolucionId))
         {
-            return await Insertar(devolucion);
+            var inserto = await Insertar(devolucion);
+            return Result.Success(inserto);
         }
         else
         {
-            return await Modificar(devolucion);
+            var modifico = await Modificar(devolucion);
+            return Result.Success(modifico);
         }
     }
 
@@ -54,14 +56,14 @@ public class DevolucionesService(IDbContextFactory<Contexto> contextFactory) : I
         return await contexto.SaveChangesAsync() > 0;
     }
 
-    public async Task<Devoluciones?> Buscar(int DevolucionId)
+    public async Task<Result<Devoluciones?>> Buscar(int DevolucionId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Devoluciones
             .FirstOrDefaultAsync(d => d.DevolucionId == DevolucionId);
     }
 
-    public async Task<List<Devoluciones>> GetList(Expression<Func<Devoluciones, bool>> criterio)
+    public async Task<Result<List<Devoluciones>>> GetList(Expression<Func<Devoluciones, bool>> criterio)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
         return await contexto.Devoluciones
@@ -74,7 +76,7 @@ public class DevolucionesService(IDbContextFactory<Contexto> contextFactory) : I
         .ToListAsync();
     }
 
-    public async Task<bool> Eliminar(int DevolucionId)
+    public async Task<Result> Eliminar(int DevolucionId)
     {
         await using var contexto = await contextFactory.CreateDbContextAsync();
 
@@ -82,7 +84,7 @@ public class DevolucionesService(IDbContextFactory<Contexto> contextFactory) : I
 
         if(devolucion == null)
         {
-            return false;
+            return Result.Failure(new Error("Devolucion vacia", "La devolucion debe contener valores"));
         }
         else
         {
@@ -91,8 +93,9 @@ public class DevolucionesService(IDbContextFactory<Contexto> contextFactory) : I
             await contexto.SaveChangesAsync();
         }
 
-        return await contexto.Devoluciones
+        var elimino = await contexto.Devoluciones
             .Where(d => d.DevolucionId == DevolucionId)
             .ExecuteDeleteAsync() > 0;
+        return Result.Success(elimino);
     }
 }
