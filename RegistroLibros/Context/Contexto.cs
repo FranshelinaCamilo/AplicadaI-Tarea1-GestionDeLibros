@@ -11,5 +11,5 @@ public class Contexto : DbContext
     public DbSet<Prestamos> Prestamos { get; set; } = null!;
     public DbSet<Devoluciones> Devoluciones { get; set;} = null!;
     public DbSet<Entradas> Entradas { get; set; } = null!;
-    public DbSet<EntradasDetalle> EntradasDetalles { get; set; } = null!;
+    public DbSet<EntradasDetalle> EntradasDetalle { get; set; } = null!;
 }
