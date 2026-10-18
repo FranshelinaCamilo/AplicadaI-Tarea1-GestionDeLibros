@@ -12,7 +12,7 @@ public class EntradasDetalle
     public int EntradaId { get; set; }
 
     [ForeignKey("EntradaId")]
-    [InverseProperty("EntradasDetalles")]
+    [InverseProperty("EntradasDetalle")]
     public virtual Entradas? Entrada { get; set; }
 
     [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un libro valido.")]
