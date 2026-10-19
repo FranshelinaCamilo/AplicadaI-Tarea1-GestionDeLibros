@@ -50,6 +50,7 @@
                     <PropertyColumn Property="@(e => e.Titulo)" title="Titulo" Sortable="true" Align="Align.Left" />
                     <PropertyColumn Property="@(e => e.Autor)" title="Autor" Sortable="true" Align="Align.Left" />
                     <PropertyColumn Property="@(e => e.AnioPublicacion)" title="Año de Publicación" Sortable="true" Align="Align.Left" />
+                    <PropertyColumn Property="@(e => e.Cantidad)" title="Cantidad Disponible" Sortable="true" Align="Align.Left" />
                     <TemplateColumn Title="Opciones">
                         <a href="/Libro/Modificar/@context.LibroId" class="btn btn-outline-primary bi bi-pencil-square"></a>
                     </TemplateColumn>
