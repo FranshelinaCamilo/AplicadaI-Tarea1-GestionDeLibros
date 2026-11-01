@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using RegistroLibros.Data.Models;
 
-namespace RegistroLibros.Data;
+namespace RegistroLibros.Data.Context;
 
 public partial class BibliotecaBdContext : DbContext
 {

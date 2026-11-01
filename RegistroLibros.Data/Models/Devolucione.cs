@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RegistroLibros.Data;
+namespace RegistroLibros.Data.Models;
 
 public partial class Devolucione
 {
