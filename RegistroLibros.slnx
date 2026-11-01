@@ -1,5 +1,7 @@
 <Solution>
+  <Project Path="RegistroLibros.Api/RegistroLibros.Api.csproj" />
   <Project Path="RegistroLibros.Data/RegistroLibros.Data.csproj" />
+  <Project Path="RegistroLibros.Services/RegistroLibros.Services.csproj" />
   <Project Path="RegistroLibros.Tests/RegistroLibros.Tests.csproj" />
   <Project Path="RegistroLibros/RegistroLibros.csproj" />
 </Solution>
