@@ -12,6 +12,7 @@ builder.Services.AddDbContextFactory<BibliotecaBdContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<EstudiantesService>();
+builder.Services.AddScoped<LibrosService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
