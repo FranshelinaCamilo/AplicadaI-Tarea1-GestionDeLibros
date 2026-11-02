@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿
+using Microsoft.AspNetCore.Mvc;
+using RegistroLibros.Api.DTOs;
 using RegistroLibros.Data.Models;
 using RegistroLibros.Services.Services;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Mapster;
 
 namespace RegistroLibros.Api.Controllers;
 
@@ -10,93 +11,98 @@ namespace RegistroLibros.Api.Controllers;
 [ApiController]
 public class PrestamosController : ControllerBase
 {
-    private readonly PrestamosService _prestamoService;
+    private readonly PrestamosService prestamosService;
 
-    public PrestamosController(PrestamosService prestamoService)
+    public PrestamosController(PrestamosService prestamosService)
     {
-        _prestamoService = prestamoService;
+        this.prestamosService = prestamosService;
     }
 
     // GET: api/prestamos
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Prestamo>>> GetPrestamos()
+    public async Task<IActionResult> Get()
     {
-        var result = await _prestamoService.GetList(p => true);
-        return Ok(result.Value);
+        var result = await prestamosService.GetList(p => p.PrestamoId > 0);
+        var resultDto = result.Value.Adapt<List<PrestamoDto>>();
+        return Ok(resultDto);
     }
 
     // GET: api/prestamos/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<Prestamo>> GetPrestamo(int id)
+    public async Task<IActionResult> Get(int id)
     {
-        var result = await _prestamoService.Buscar(id);
+        var result = await prestamosService.Buscar(id);
 
         if (!result.IsSuccess || result.Value == null)
         {
             return NotFound();
         }
 
-        return Ok(result.Value);
+        var resultDto = result.Value.Adapt<PrestamoDto>();
+        return Ok(resultDto);
     }
 
     // POST: api/prestamos
     [HttpPost]
-    public async Task<ActionResult<Prestamo>> PostPrestamo(Prestamo prestamo)
+    public async Task<IActionResult> Post([FromBody] PrestamoDto prestamoDto)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var result = await _prestamoService.Guardar(prestamo);
+        var prestamo = prestamoDto.Adapt<Prestamo>();
+        prestamo.PrestamoId = 0;
+
+        var result = await prestamosService.Guardar(prestamo);
 
         if (!result.IsSuccess)
         {
-            return BadRequest("No se pudo guardar el préstamo. Comprueba que el libro exista y esté disponible.");
+            return BadRequest("No se pudo guardar el préstamo.");
         }
 
-        return CreatedAtAction(nameof(GetPrestamo), new { id = prestamo.PrestamoId }, prestamo);
+        var resultDto = prestamo.Adapt<PrestamoDto>();
+        return Ok(resultDto);
     }
 
     // PUT: api/prestamos/5
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutPrestamo(int id, Prestamo prestamo)
+    public async Task<IActionResult> Put(int id, [FromBody] PrestamoDto prestamoDto)
     {
-        if (id != prestamo.PrestamoId)
-        {
-            return BadRequest("El ID de la ruta no coincide con el ID del préstamo.");
-        }
-
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        if (!await _prestamoService.Existe(id))
+        if (!await prestamosService.Existe(id))
         {
             return NotFound();
         }
 
-        var result = await _prestamoService.Guardar(prestamo);
+        var prestamo = prestamoDto.Adapt<Prestamo>();
+        prestamo.PrestamoId = id;
+
+        var result = await prestamosService.Guardar(prestamo);
 
         if (!result.IsSuccess)
         {
-            return BadRequest("No se pudo actualizar el préstamo. Comprueba que el libro exista y esté disponible.");
+            return BadRequest("No se pudo actualizar el préstamo.");
         }
 
-        return NoContent();
+        var resultDto = prestamo.Adapt<PrestamoDto>();
+        return Ok(resultDto);
     }
 
     // DELETE: api/prestamos/5
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletePrestamo(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        if (!await _prestamoService.Existe(id))
+        if (!await prestamosService.Existe(id))
         {
             return NotFound();
         }
 
-        var result = await _prestamoService.Eliminar(id);
+        var result = await prestamosService.Eliminar(id);
 
         if (!result.IsSuccess)
         {
