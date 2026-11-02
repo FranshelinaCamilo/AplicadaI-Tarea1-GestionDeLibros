@@ -59,3 +59,4 @@ nunit-*.xml
 # Visual Studio
 .vs/
 *.csproj.user
+RegistroLibros/Properties/PublishProfiles/
