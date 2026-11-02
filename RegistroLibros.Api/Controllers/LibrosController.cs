@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RegistroLibros.Api.DTOs;
 using RegistroLibros.Data.Models;
 using RegistroLibros.Services.Services;
+using Mapster;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -10,97 +12,67 @@ namespace RegistroLibros.Api.Controllers;
 [ApiController]
 public class LibrosController : ControllerBase
 {
-    private readonly LibrosService _libroService;
+    private readonly LibrosService librosService;
 
-    public LibrosController(LibrosService libroService)
+    public LibrosController(LibrosService librosService)
     {
-        _libroService = libroService;
+        this.librosService = librosService;
     }
-
-    // GET: api/libros
+    // GET: api/<LibrosController>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Libro>>> GetLibros()
+    public async Task<IActionResult> Get()
     {
-        var result = await _libroService.GetList(l => true);
-        return Ok(result.Value);
+        var result = await librosService.GetList(l => l.LibroId > 0);
+        var resultDto = result.Value.Adapt<List<LibroDto>>();
+        return Ok(resultDto);
     }
 
-    // GET: api/libros/5
+    // GET api/<LibrosController>/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<Libro>> GetLibro(int id)
+    public async Task<IActionResult> Get(int id)
     {
-        var result = await _libroService.Buscar(id);
-
-        if (!result.IsSuccess || result.Value == null)
-        {
-            return NotFound();
-        }
-
-        return Ok(result.Value);
+        var result = await librosService.Buscar(id);
+        var resultDto = result.Value.Adapt<LibroDto>();
+        return Ok(resultDto);
     }
 
-    // POST: api/libros 
+    // POST api/<LibrosController>
     [HttpPost]
-    public async Task<ActionResult<Libro>> PostLibro(Libro libro)
+    public async Task<IActionResult> Post([FromBody] LibroDto librodto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
+        var libro = librodto.Adapt<Libro>();
+        libro.LibroId = 0;
+        var result = await librosService.Guardar(libro);
 
-        var result = await _libroService.Guardar(libro);
         if (!result.IsSuccess)
         {
-            return BadRequest("No se pudo guardar el libro.");
+            return BadRequest("No se pudo agregar el libro.");
         }
-
-        return CreatedAtAction(nameof(GetLibro), new { id = libro.LibroId }, libro);
+        var resultDto = libro.Adapt<LibroDto>();
+        return Ok(resultDto);
     }
 
-    // PUT: api/libros/5
+    // PUT api/<LibrosController>/5
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutLibro(int id, Libro libro)
+    public async Task<IActionResult> Put(int id, [FromBody] LibroDto librodto)
     {
-        if (id != libro.LibroId)
-        {
-            return BadRequest("El ID de la ruta no coincide con el ID del libro.");
-        }
+        var libro = librodto.Adapt<Libro>();
+        libro.LibroId = id;
+        var result = await librosService.Guardar(libro);
 
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        if (!await _libroService.Existe(id))
-        {
-            return NotFound();
-        }
-
-        var result = await _libroService.Guardar(libro);
         if (!result.IsSuccess)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Error al actualizar el libro.");
+            return BadRequest("No se pudo actualizar el libro.");
         }
-
-        return NoContent();
+        var resultDto = libro.Adapt<LibroDto>();
+        return Ok(resultDto);
     }
 
-    // DELETE: api/libros/5
+    // DELETE api/<LibrosController>/5
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteLibro(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        if (!await _libroService.Existe(id))
-        {
-            return NotFound();
-        }
-
-        var result = await _libroService.Eliminar(id);
-        if (!result.IsSuccess)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "No se pudo eliminar el libro.");
-        }
-
-        return NoContent();
+        var result = await librosService.Eliminar(id);
+        return Ok(result);
     }
 }
-

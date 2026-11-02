@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿
+using Microsoft.AspNetCore.Mvc;
+using RegistroLibros.Api.DTOs;
 using RegistroLibros.Data.Models;
 using RegistroLibros.Services.Services;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Mapster;
 
 namespace RegistroLibros.Api.Controllers;
 
@@ -10,97 +11,98 @@ namespace RegistroLibros.Api.Controllers;
 [ApiController]
 public class EstudiantesController : ControllerBase
 {
-    private readonly EstudiantesService _estudianteService;
+    private readonly EstudiantesService estudiantesService;
 
-    public EstudiantesController(EstudiantesService estudianteService)
+    public EstudiantesController(EstudiantesService estudiantesService)
     {
-        _estudianteService = estudianteService;
+        this.estudiantesService = estudiantesService;
     }
 
     // GET: api/estudiantes
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Estudiante>>> GetEstudiantes()
+    public async Task<IActionResult> Get()
     {
-        var result = await _estudianteService.GetList(e => true);
-        return Ok(result.Value);
+        var result = await estudiantesService.GetList(e => e.EstudianteId > 0);
+        var resultDto = result.Value.Adapt<List<EstudianteDto>>();
+        return Ok(resultDto);
     }
 
     // GET: api/estudiantes/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<Estudiante>> GetEstudiante(int id)
+    public async Task<IActionResult> Get(int id)
     {
-        var result = await _estudianteService.Buscar(id);
+        var result = await estudiantesService.Buscar(id);
 
         if (!result.IsSuccess || result.Value == null)
         {
             return NotFound();
         }
 
-        return Ok(result.Value);
+        var resultDto = result.Value.Adapt<EstudianteDto>();
+        return Ok(resultDto);
     }
 
     // POST: api/estudiantes
     [HttpPost]
-    public async Task<ActionResult<Estudiante>> PostEstudiante(Estudiante estudiante)
+    public async Task<IActionResult> Post([FromBody] EstudianteDto estudianteDto)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var result = await _estudianteService.Guardar(estudiante);
+        var estudiante = estudianteDto.Adapt<Estudiante>();
+        estudiante.EstudianteId = 0;
+
+        var result = await estudiantesService.Guardar(estudiante);
+
         if (!result.IsSuccess)
         {
-            return BadRequest("No se pudo guardar el estudiante.");
+            return BadRequest("No se pudo agregar el estudiante.");
         }
 
-        return CreatedAtAction(nameof(GetEstudiante), new { id = estudiante.EstudianteId }, estudiante);
+        var resultDto = estudiante.Adapt<EstudianteDto>();
+        return Ok(resultDto);
     }
 
     // PUT: api/estudiantes/5
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutEstudiante(int id, Estudiante estudiante)
+    public async Task<IActionResult> Put(int id, [FromBody] EstudianteDto estudianteDto)
     {
-        if (id != estudiante.EstudianteId)
-        {
-            return BadRequest("El ID de la ruta no coincide con el ID del estudiante.");
-        }
-
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        if (!await _estudianteService.Existe(id))
+        if (!await estudiantesService.Existe(id))
         {
             return NotFound();
         }
 
-        var result = await _estudianteService.Guardar(estudiante);
+        var estudiante = estudianteDto.Adapt<Estudiante>();
+        estudiante.EstudianteId = id;
+
+        var result = await estudiantesService.Guardar(estudiante);
+
         if (!result.IsSuccess)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Error al actualizar el estudiante.");
+            return BadRequest("No se pudo actualizar el estudiante.");
         }
 
-        return NoContent();
+        var resultDto = estudiante.Adapt<EstudianteDto>();
+        return Ok(resultDto);
     }
 
     // DELETE: api/estudiantes/5
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteEstudiante(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        if (!await _estudianteService.Existe(id))
+        if (!await estudiantesService.Existe(id))
         {
             return NotFound();
         }
 
-        var result = await _estudianteService.Eliminar(id);
-        if (!result.IsSuccess)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "No se pudo eliminar el estudiante.");
-        }
-
-        return NoContent();
+        var result = await estudiantesService.Eliminar(id);
+        return Ok(result);
     }
 }
-
